@@ -46,7 +46,7 @@ class AlienBase;
 class GeoscapeState : public State
 {
 private:
-	Surface *_bg, *_sideLine, *_sidebar;
+	Surface *_bg, *_sideLine, *_zoomControls;
 	Globe *_globe;
 	TextButton *_btnIntercept, *_btnBases, *_btnGraphs, *_btnUfopaedia, *_btnOptions, *_btnFunding;
 	TextButton *_timeSpeed;

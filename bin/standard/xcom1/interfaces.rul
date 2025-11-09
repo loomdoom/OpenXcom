@@ -2522,7 +2522,7 @@ interfaces:
       - id: errorMessage
         color: 239   # bright green
       - id: globePosition
-        pos: ["(screenWidth-width)/2","(screenHeight-height)/2"]
+        pos: ["0","(screenHeight-height)/2"]
         size: ["screenWidth-64",screenHeight]
       - id: buttonIntercept
         pos: ["screenWidth-63","screenHeight/2-100"]
@@ -2578,3 +2578,41 @@ interfaces:
       - id: buttonZoomOut
         pos: ["screenWidth-20","screenHeight/2+82"]
         size: [13,17]
+      - id: zoomControls
+        pos: ["screenWidth-63","screenHeight/2-2"]
+        size: [64,46]
+  - type: geoscapeTimer
+    elements:
+      - id: timerBackground
+        pos: ["screenWidth-6","screenHeight/2-26"]
+        size: [63,16]
+      - id: txtHour
+        pos: ["screenWidth-61","screenHeight/2-26"]
+        size: [20,16]
+      - id: txtHourSep
+        pos: ["screenWidth-41","screenHeight/2-26"]
+        size: [4,16]
+      - id: txtMin
+        pos: ["screenWidth-37","screenHeight/2-26"]
+        size: [20,16]
+      - id: txtMinSep
+        pos: ["screenWidth-17","screenHeight/2-26"]
+        size: [4,16]
+      - id: txtSec
+        pos: ["screenWidth-13","screenHeight/2-20"]
+        size: [11,8]
+      - id: txtWeekday
+        pos: ["screenWidth-61","screenHeight/2-13"]
+        size: [59,8]
+      - id: txtDay
+        pos: ["screenWidth-61","screenHeight/2-6"]
+        size: [29,8]
+      - id: txtMonth
+        pos: ["screenWidth-32","screenHeight/2-6"]
+        size: [29,8]
+      - id: txtYear
+        pos: ["screenWidth-61","screenHeight/2+1"]
+        size: [59,8]
+      - id: txtFunds
+        pos: ["screenWidth-61","screenHeight/2-27"]
+        size: [59,8]
