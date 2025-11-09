@@ -83,6 +83,7 @@ endif ()
 
 # Include rapidyaml lib
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
+include_directories(${CMAKE_SOURCE_DIR}/libs/picomath)
 
 if(NOT UNIX AND IS_DIRECTORY ${DEPS_DIR})
    include_directories ( ${DEPS_DIR}/include/SDL ${DEPS_DIR}/include )
@@ -239,6 +240,9 @@ if ( NOT WIN32 OR NOT CPACK_GENERATOR STREQUAL "7Z" ) # FIXME: that's to exclude
   install(FILES "${CMAKE_SOURCE_DIR}/res/linux/icons/openxcom.svg"
     DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/icons/hicolor/scalable/apps")
 endif ()
+
+add_compile_options(/wd4244 /wd4267 /wd4267 /wd4996 /wd4267) # MSVC warnings to ignore
+add_compile_options(/bigobj) # MSVC warnings to ignore
 
 add_subdirectory ( docs )
 add_subdirectory ( src )

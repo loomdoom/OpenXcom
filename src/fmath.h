@@ -29,6 +29,10 @@
 #define M_PI_4     0.785398163397448309616
 #endif
 
+#ifndef M_E
+#define M_E        2.71828182845904523536
+#endif
+
 // Float operations
 
 inline bool AreSame(float l, float r)
