@@ -2517,3 +2517,26 @@ interfaces:
         color: 218   # blue
       - id: button2
         color: 241   # pink
+  - type: geoscapeLayout
+    elements:
+      - id: globePosition
+        pos: ["(screenWidth-width)/2","(screenHeight-height)/2"]
+        size: ["screenWidth-64",screenHeight]
+      - id: buttonIntercept
+        pos: ["screenWidth-63","screenHeight/2-100"]
+        size: [63,11]
+      - id: buttonBases
+        pos: ["screenWidth-63","screenHeight/2-88"]
+        size: [63,11]
+      - id: buttonGraphs
+        pos: ["screenWidth-63","screenHeight/2-76"]
+        size: [63,11]
+      - id: buttonUfopaedia
+        pos: ["screenWidth-63","screenHeight/2-64"]
+        size: [63,11]
+      - id: buttonOptions
+        pos: ["screenWidth-63","screenHeight/2-52"]
+        size: [63,11]
+      - id: buttonFunding
+        pos: ["screenWidth-63","screenHeight/2-40"]
+        size: [63,11]

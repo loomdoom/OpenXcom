@@ -133,10 +133,61 @@
 #include "../Mod/Texture.h"
 #include "../fmath.h"
 #include "../fallthrough.h"
+#include "../../libs/picomath/picomath.h"
 
 namespace OpenXcom
 {
+	namespace {
+		std::tuple<int, int,int,int> calculateDimmensions(const Game* _game,const std::string& name)
+		{
+			picomath::PicoMath picomath;
+			picomath.addVariable("screenWidth") = Options::baseXGeoscape;
+			picomath.addVariable("screenHeight") = Options::baseYGeoscape;
+			auto element = _game->getMod()->getInterface("geoscapeLayout")->getElement(name);
+			const std::string &xFormula = element->xFormula;
+			const std::string &yFormula = element->yFormula;
+			const std::string &wFormula = element->wFormula;
+			const std::string &hFormula = element->hFormula;
 
+			int x; int y; int w; int h;
+
+			if(wFormula.empty() || hFormula.empty())
+			{
+				w = element->w;
+				h = element->h;
+			}
+			else
+			{
+				auto result = picomath.evalExpression(wFormula.c_str());
+				if(result.isOk())
+					w = result.getResult();
+
+				result = picomath.evalExpression(hFormula.c_str());
+				if(result.isOk())
+					h = result.getResult();
+			}
+
+			picomath.addVariable("width") = w;
+			picomath.addVariable("height") = h;
+
+			if(xFormula.empty() || yFormula.empty())
+			{
+				x = element->x;
+				y = element->y;
+			}
+			else
+			{
+				auto result = picomath.evalExpression(xFormula.c_str());
+				if(result.isOk())
+					x = result.getResult();
+
+				result = picomath.evalExpression(yFormula.c_str());
+				if(result.isOk())
+					y = result.getResult();
+			}
+			return {x,y,w,h};
+		}
+	}
 /**
  * Initializes all the elements in the Geoscape screen.
  * @param game Pointer to the core game.
@@ -152,16 +203,31 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_sideLine = new Surface(64, screenHeight, screenWidth - 64, 0);
 	_sidebar = new Surface(64, 200, screenWidth - 64, screenHeight / 2 - 100);
 
-	_globe = new Globe(_game, (screenWidth-64)/2, screenHeight/2, screenWidth-64, screenHeight, 0, 0);
+	auto element = _game->getMod()->getInterface("geoscapeLayout")->getElement("globePosition");
+	auto[x,y,w,h] = calculateDimmensions(_game,"globePosition");
+
+	_globe = new Globe(_game, w/2, h/2, w, h, x, y);
 	_bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
 	_bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
 
-	_btnIntercept = new TextButton(63, 11, screenWidth-63, screenHeight/2-100);
-	_btnBases = new TextButton(63, 11, screenWidth-63, screenHeight/2-88);
-	_btnGraphs = new TextButton(63, 11, screenWidth-63, screenHeight/2-76);
-	_btnUfopaedia = new TextButton(63, 11, screenWidth-63, screenHeight/2-64);
-	_btnOptions = new TextButton(63, 11, screenWidth-63, screenHeight/2-52);
-	_btnFunding = new TextButton(63, 11, screenWidth-63, screenHeight/2-40);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonIntercept");
+	_btnIntercept = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonBases");
+	_btnBases = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonGraphs");
+	_btnUfopaedia = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonUfopaedia");
+	_btnGraphs = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonOptions");
+	_btnOptions = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonFunding");
+	_btnFunding = new TextButton(w, h, x, y);
 
 	_btn5Secs = new TextButton(31, 13, screenWidth-63, screenHeight/2+12);
 	_btn1Min = new TextButton(31, 13, screenWidth-31, screenHeight/2+12);

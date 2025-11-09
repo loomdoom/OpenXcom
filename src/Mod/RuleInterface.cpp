@@ -58,19 +58,45 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod)
 	mod->loadSoundOffset(_type, _sound, reader["sound"], "GEO.CAT");
 	for (const auto& elementReader : reader["elements"].children())
 	{
+
 		Element& element = _elements[elementReader["id"].readVal<std::string>()];
 		if (elementReader["size"])
 		{
-			std::pair<int, int> pos = elementReader["size"].readVal<std::pair<int, int> >();
-			element.w = pos.first;
-			element.h = pos.second;
+			std::pair<std::string,std::string> values;
+			elementReader.tryRead("size",values);
+
+			bool isWValue = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
+			bool isHValue = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
+			if (isWValue && isHValue)
+			{
+				element.w = std::stoi(values.first);
+				element.h = std::stoi(values.second);
+			}
+			else {
+				element.wFormula = values.first;
+				element.hFormula = values.second;
+			}
 		}
 		if (elementReader["pos"])
 		{
-			std::pair<int, int> pos = elementReader["pos"].readVal<std::pair<int, int> >();
-			element.x = pos.first;
-			element.y = pos.second;
+			std::pair<std::string,std::string> values;
+			elementReader.tryRead("pos",values);
+
+			bool isXValue = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
+			bool isYValue = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
+			if (isXValue && isYValue)
+			{
+				element.x = std::stoi(values.first);
+				element.y = std::stoi(values.second);
+			}
+			else
+			{
+				element.xFormula = values.first;
+				element.yFormula = values.second;
+			}
+
 		}
+
 		elementReader.tryRead("color", element.color);
 		elementReader.tryRead("color2", element.color2);
 		elementReader.tryRead("border", element.border);

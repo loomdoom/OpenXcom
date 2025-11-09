@@ -43,6 +43,11 @@ struct Element
 	/// Custom value
 	int custom = 0;
 
+	std::string xFormula = "";
+	std::string yFormula = "";
+	std::string wFormula = "";
+	std::string hFormula = "";
+
 	/// defines inversion behaviour
 	bool TFTDMode = false;
 };
