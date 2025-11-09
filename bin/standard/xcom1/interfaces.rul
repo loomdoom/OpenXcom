@@ -1002,41 +1002,6 @@ interfaces:
         border: 218  # blue
       - id: button
         color: 218   # blue
-  - type: geoscape
-    backgroundImage: BACK01.SCR
-    elements:
-      - id: palette
-        color: 0     # brown
-        color2: 6
-      - id: textLoad
-        color: 133   # minty green
-      - id: button
-        color: 246   # light blue
-        color2: 245  # slightly lighter blue
-      - id: text
-        color: 244   # even lighter blue
-      - id: slackingIndicator
-        color: 244   # even lighter blue
-        color2: 133  # minty green
-        custom: -12  # above Intercept button
-      - id: trainingIndicator
-        color: 244   # even lighter blue
-        color2: 133  # minty green
-        custom: 4  # below standard visible area
-      - id: genericWindow
-        color: 239   # bright green
-      - id: genericText
-        color: 239   # bright green
-        color2: 138  # yellow
-        border: 133  # minty green
-      - id: genericButton1
-        color: 133   # minty green
-      - id: genericButton2
-        color: 239   # bright green
-      - id: errorPalette
-        color: 6     # brown
-      - id: errorMessage
-        color: 239   # bright green
   - type: sellMenu
     backgroundImage: BACK13.SCR
     palette: PAL_BASESCAPE
@@ -2517,8 +2482,45 @@ interfaces:
         color: 218   # blue
       - id: button2
         color: 241   # pink
-  - type: geoscapeLayout
+  - type: geoscape
+    backgroundImage: BACK01.SCR
     elements:
+      - id: palette
+        color: 0     # brown
+        color2: 6
+      - id: textLoad
+        color: 133   # minty green
+      - id: button
+        color: 246   # light blue
+        color2: 245  # slightly lighter blue
+      - id: text
+        color: 244   # even lighter blue
+      - id: slackingIndicator
+        color: 244   # even lighter blue
+        color2: 133  # minty green
+        custom: -12  # above Intercept button
+        pos: ["screenWidth-61","screenHeight/2-100+(-12)"] #includes slackingIndicatorOffset:-12
+        size: [59,17]
+      - id: trainingIndicator
+        color: 244   # even lighter blue
+        color2: 133  # minty green
+        custom: 4  # below standard visible area
+        pos: ["screenWidth-61","screenHeight/2+100+4"] #includes trainingIndicatorOffset:4
+        size: [59,17]
+      - id: genericWindow
+        color: 239   # bright green
+      - id: genericText
+        color: 239   # bright green
+        color2: 138  # yellow
+        border: 133  # minty green
+      - id: genericButton1
+        color: 133   # minty green
+      - id: genericButton2
+        color: 239   # bright green
+      - id: errorPalette
+        color: 6     # brown
+      - id: errorMessage
+        color: 239   # bright green
       - id: globePosition
         pos: ["(screenWidth-width)/2","(screenHeight-height)/2"]
         size: ["screenWidth-64",screenHeight]
@@ -2540,3 +2542,39 @@ interfaces:
       - id: buttonFunding
         pos: ["screenWidth-63","screenHeight/2-40"]
         size: [63,11]
+      - id: button5Secs
+        pos: ["screenWidth-63","screenHeight/2+12"]
+        size: [31,13]
+      - id: button1Min
+        pos: ["screenWidth-31","screenHeight/2+12"]
+        size: [31,13]
+      - id: button5Mins
+        pos: ["screenWidth-63","screenHeight/2+26"]
+        size: [31,13]
+      - id: button30Mins
+        pos: ["screenWidth-31","screenHeight/2+26"]
+        size: [31,13]
+      - id: button1Hour
+        pos: ["screenWidth-63","screenHeight/2+40"]
+        size: [31,13]
+      - id: button1Day
+        pos: ["screenWidth-31","screenHeight/2+40"]
+        size: [31,13]
+      - id: buttonRotateLeft
+        pos: ["screenWidth-61","screenHeight/2+76"]
+        size: [12,10]
+      - id: buttonRotateRight
+        pos: ["screenWidth-37","screenHeight/2+76"]
+        size: [12,10]
+      - id: buttonRotateUp
+        pos: ["screenWidth-49","screenHeight/2+62"]
+        size: [13,12]
+      - id: buttonRotateDown
+        pos: ["screenWidth-49","screenHeight/2+87"]
+        size: [13,12]
+      - id: buttonZoomIn
+        pos: ["screenWidth-25","screenHeight/2+56"]
+        size: [23,23]
+      - id: buttonZoomOut
+        pos: ["screenWidth-20","screenHeight/2+82"]
+        size: [13,17]

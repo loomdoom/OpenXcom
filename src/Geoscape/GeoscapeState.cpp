@@ -138,7 +138,7 @@
 namespace OpenXcom
 {
 	namespace {
-		std::tuple<int, int,int,int> calculateDimmensions(const Game* _game,const std::string& name)
+		std::tuple<int, int,int,int> evaluateElement(const Game* _game,const std::string& name)
 		{
 			picomath::PicoMath picomath;
 			picomath.addVariable("screenWidth") = Options::baseXGeoscape;
@@ -204,44 +204,66 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_sidebar = new Surface(64, 200, screenWidth - 64, screenHeight / 2 - 100);
 
 	auto element = _game->getMod()->getInterface("geoscapeLayout")->getElement("globePosition");
-	auto[x,y,w,h] = calculateDimmensions(_game,"globePosition");
+	auto[x,y,w,h] = evaluateElement(_game,"globePosition");
 
 	_globe = new Globe(_game, w/2, h/2, w, h, x, y);
 	_bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
 	_bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
 
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonIntercept");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonIntercept");
 	_btnIntercept = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonBases");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonBases");
 	_btnBases = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonGraphs");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonGraphs");
 	_btnUfopaedia = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonUfopaedia");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonUfopaedia");
 	_btnGraphs = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonOptions");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonOptions");
 	_btnOptions = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = calculateDimmensions(_game,"buttonFunding");
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonFunding");
 	_btnFunding = new TextButton(w, h, x, y);
 
-	_btn5Secs = new TextButton(31, 13, screenWidth-63, screenHeight/2+12);
-	_btn1Min = new TextButton(31, 13, screenWidth-31, screenHeight/2+12);
-	_btn5Mins = new TextButton(31, 13, screenWidth-63, screenHeight/2+26);
-	_btn30Mins = new TextButton(31, 13, screenWidth-31, screenHeight/2+26);
-	_btn1Hour = new TextButton(31, 13, screenWidth-63, screenHeight/2+40);
-	_btn1Day = new TextButton(31, 13, screenWidth-31, screenHeight/2+40);
+	std::tie(x,y,w,h) = evaluateElement(_game,"button5Secs");
+	_btn5Secs = new TextButton(w, h, x, y);
 
-	_btnRotateLeft = new InteractiveSurface(12, 10, screenWidth-61, screenHeight/2+76);
-	_btnRotateRight = new InteractiveSurface(12, 10, screenWidth-37, screenHeight/2+76);
-	_btnRotateUp = new InteractiveSurface(13, 12, screenWidth-49, screenHeight/2+62);
-	_btnRotateDown = new InteractiveSurface(13, 12, screenWidth-49, screenHeight/2+87);
-	_btnZoomIn = new InteractiveSurface(23, 23, screenWidth-25, screenHeight/2+56);
-	_btnZoomOut = new InteractiveSurface(13, 17, screenWidth-20, screenHeight/2+82);
+	std::tie(x,y,w,h) = evaluateElement(_game,"button1Min");
+	_btn1Min = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"button5Mins");
+	_btn5Mins = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"button30Mins");
+	_btn30Mins = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"button1Hour");
+	_btn1Hour = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"button1Day");
+	_btn1Day = new TextButton(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateLeft");
+	_btnRotateLeft = new InteractiveSurface(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateRight");
+	_btnRotateRight = new InteractiveSurface(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateUp");
+	_btnRotateUp = new InteractiveSurface(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateDown");
+	_btnRotateDown = new InteractiveSurface(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomIn");
+	_btnZoomIn = new InteractiveSurface(w, h, x, y);
+
+	std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomOut");
+	_btnZoomOut = new InteractiveSurface(w, h, x, y);
 
 	int height = (screenHeight - Screen::ORIGINAL_HEIGHT) / 2 + 10;
 	_sideTop = new TextButton(63, height, screenWidth-63, _sidebar->getY() - height - 1);
@@ -258,10 +280,10 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_txtYear = new Text(59, 8, screenWidth-61, screenHeight/2+1);
 	_txtFunds = new Text(59, 8, screenWidth-61, screenHeight/2-27);
 
-	int slackingIndicatorOffset = _game->getMod()->getInterface("geoscape")->getElement("slackingIndicator")->custom;
-	_txtSlacking = new Text(59, 17, screenWidth - 61, screenHeight / 2 - 100 + slackingIndicatorOffset);
-	int trainingIndicatorOffset = _game->getMod()->getInterface("geoscape")->getElement("trainingIndicator")->custom;
-	_txtTraining = new Text(59, 17, screenWidth - 61, screenHeight / 2 + 100 + trainingIndicatorOffset);
+	std::tie(x,y,w,h) = evaluateElement(_game,"slackingIndicator");
+	_txtSlacking = new Text(w, h, x, y);
+	std::tie(x,y,w,h) = evaluateElement(_game,"trainingIndicator");
+	_txtTraining = new Text(w, h, x, y);
 
 	_timeSpeed = _btn5Secs;
 	_gameTimer = new Timer(Options::geoClockSpeed);
