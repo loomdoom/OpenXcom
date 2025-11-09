@@ -43,6 +43,9 @@ struct Element
 	/// Custom value
 	int custom = 0;
 
+	/// Display order
+	int order = 0;
+
 	std::string xFormula = "";
 	std::string yFormula = "";
 	std::string wFormula = "";

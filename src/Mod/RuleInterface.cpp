@@ -101,6 +101,7 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod)
 		elementReader.tryRead("color2", element.color2);
 		elementReader.tryRead("border", element.border);
 		elementReader.tryRead("custom", element.custom);
+		elementReader.tryRead("order", element.order);
 		elementReader.tryRead("TFTDMode", element.TFTDMode);
 	}
 }

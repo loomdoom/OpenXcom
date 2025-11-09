@@ -2579,7 +2579,7 @@ interfaces:
         pos: ["screenWidth-20","screenHeight/2+82"]
         size: [13,17]
       - id: zoomControls
-        pos: ["screenWidth-63","screenHeight/2-2"]
+        pos: ["screenWidth-64","screenHeight/2+54"]
         size: [64,46]
   - type: geoscapeTimer
     elements:
