@@ -58,51 +58,75 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod)
 	mod->loadSoundOffset(_type, _sound, reader["sound"], "GEO.CAT");
 	for (const auto& elementReader : reader["elements"].children())
 	{
-
 		Element& element = _elements[elementReader["id"].readVal<std::string>()];
-		if (elementReader["size"])
-		{
-			std::pair<std::string,std::string> values;
-			elementReader.tryRead("size",values);
 
-			bool isWValue = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
-			bool isHValue = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
-			if (isWValue && isHValue)
+		for (auto propertyReader  : elementReader.children())
+		{
+			auto k = propertyReader.key();
+			if(k == "id")
 			{
-				element.w = std::stoi(values.first);
-				element.h = std::stoi(values.second);
+				continue;
+			}
+			else if(k == "size")
+			{
+				std::pair<std::string,std::string> values;
+				propertyReader.tryReadVal(values);
+				bool isWInteger = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
+				bool isHInteger = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
+				if (isWInteger && isHInteger)
+				{
+					//for backwards compatibility
+					element.w = std::stoi(values.first);
+					element.h = std::stoi(values.second);
+				}
+
+				element.properties.Add("size", propertyReader.val());
+				element.properties.Add("w", values.first);
+				element.properties.Add("h", values.second);
+				continue;
+			}
+			else if (k == "pos") {
+				std::pair<std::string,std::string> values;
+				propertyReader.tryReadVal(values);
+				bool isXInteger = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
+				bool isYInteger = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
+				if (isXInteger && isYInteger)
+				{
+					//for backwards compatibility
+					element.x = std::stoi(values.first);
+					element.y = std::stoi(values.second);
+				}
+
+				element.properties.Add("pos", propertyReader.val());
+				element.properties.Add("x", values.first);
+				element.properties.Add("y", values.second);
+				continue;
+			}
+			else if (k == "color") {
+				propertyReader.tryReadVal(element.color);
+				continue;
+			}
+			else if (k == "color2") {
+				propertyReader.tryReadVal(element.color2);
+				continue;
+			}
+			else if (k == "border") {
+				propertyReader.tryReadVal(element.border);
+				continue;
+			}
+			else if (k == "custom") {
+				propertyReader.tryReadVal(element.custom);
+				continue;
+			}
+			else if (k == "TFTDMode") {
+				propertyReader.tryReadVal(element.TFTDMode);
+				continue;
 			}
 			else {
-				element.wFormula = values.first;
-				element.hFormula = values.second;
+				auto v = propertyReader.val();
+				element.properties.Add(k, v);
 			}
 		}
-		if (elementReader["pos"])
-		{
-			std::pair<std::string,std::string> values;
-			elementReader.tryRead("pos",values);
-
-			bool isXValue = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
-			bool isYValue = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
-			if (isXValue && isYValue)
-			{
-				element.x = std::stoi(values.first);
-				element.y = std::stoi(values.second);
-			}
-			else
-			{
-				element.xFormula = values.first;
-				element.yFormula = values.second;
-			}
-
-		}
-
-		elementReader.tryRead("color", element.color);
-		elementReader.tryRead("color2", element.color2);
-		elementReader.tryRead("border", element.border);
-		elementReader.tryRead("custom", element.custom);
-		elementReader.tryRead("order", element.order);
-		elementReader.tryRead("TFTDMode", element.TFTDMode);
 	}
 }
 

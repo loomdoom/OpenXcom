@@ -143,48 +143,36 @@ namespace OpenXcom
 			picomath::PicoMath picomath;
 			picomath.addVariable("screenWidth") = Options::baseXGeoscape;
 			picomath.addVariable("screenHeight") = Options::baseYGeoscape;
+
 			auto element = _game->getMod()->getInterface(interfaceName)->getElement(name);
-			const std::string &xFormula = element->xFormula;
-			const std::string &yFormula = element->yFormula;
-			const std::string &wFormula = element->wFormula;
-			const std::string &hFormula = element->hFormula;
+
+			const auto &xDefinition = element->properties.Get("x");//element->xDefinition;
+			const auto &yDefinition = element->properties.Get("y");//element->yDefinition;
+			const auto &wDefinition = element->properties.Get("w");//element->wFormula;
+			const auto &hDefinition = element->properties.Get("h");//element->hFormula;
 
 			int x; int y; int w; int h;
 
-			if(wFormula.empty() || hFormula.empty())
-			{
-				w = element->w;
-				h = element->h;
-			}
-			else
-			{
-				auto result = picomath.evalExpression(wFormula.c_str());
-				if(result.isOk())
-					w = result.getResult();
 
-				result = picomath.evalExpression(hFormula.c_str());
-				if(result.isOk())
-					h = result.getResult();
-			}
+			auto result = picomath.evalExpression(wDefinition.data());
+			if(result.isOk())
+				w = result.getResult();
+
+			result = picomath.evalExpression(hDefinition.data());
+			if(result.isOk())
+				h = result.getResult();
 
 			picomath.addVariable("width") = w;
 			picomath.addVariable("height") = h;
 
-			if(xFormula.empty() || yFormula.empty())
-			{
-				x = element->x;
-				y = element->y;
-			}
-			else
-			{
-				auto result = picomath.evalExpression(xFormula.c_str());
-				if(result.isOk())
-					x = result.getResult();
+			result = picomath.evalExpression(xDefinition.data());
+			if(result.isOk())
+				x = result.getResult();
 
-				result = picomath.evalExpression(yFormula.c_str());
-				if(result.isOk())
-					y = result.getResult();
-			}
+			result = picomath.evalExpression(yDefinition.data());
+			if(result.isOk())
+				y = result.getResult();
+
 			return {x,y,w,h};
 		}
 	}
@@ -378,11 +366,13 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	add(_cbxArea, "button", "geoscape");
 	add(_cbxCountry, "button", "geoscape");
 
-	// Set up objects
+	// create zoom controls (extract from geobrd)
 	Surface *geobord = _game->getMod()->getSurface("GEOBORD.SCR");
 	geobord->setX(_zoomControls->getX() - geobord->getWidth() + _zoomControls->getWidth());
 	geobord->setY(_zoomControls->getY()-72-68-14); // -daytime
 	_zoomControls->copy(geobord);
+
+
 	_game->getMod()->getSurface("ALTGEOBORD.SCR")->blitNShade(_bg, 0, 0);
 
 	_sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);

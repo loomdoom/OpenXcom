@@ -27,8 +27,47 @@ namespace OpenXcom
 class Mod;
 class SavedGame;
 
+
+
 struct Element
 {
+    struct Properties
+	{
+		private:
+    		std::unique_ptr<std::map<std::string, std::string,std::less<void>>> prps = {};
+
+		public:
+			void Add(std::string_view key, std::string_view value)
+			{
+				if (!prps)
+				{
+					prps.reset(new std::map<std::string, std::string,std::less<void>>());
+				}
+				prps->emplace(key, value);
+			}
+
+			const std::string_view Get(std::string_view key, std::string_view defaultValue = "") const
+			{
+				if (!prps)
+				{
+					return defaultValue;
+				}
+				auto it = prps->find(key);
+				return it != prps->end() ? std::string_view(it->second) : defaultValue;
+			}
+
+			const bool Has(std::string_view key) const
+			{
+				if (!prps)
+				{
+					return false;
+				}
+				auto it = prps->find(key);
+				return it != prps->end();
+			}
+	};
+
+
 	/// basic rect info.
 	int x = INT_MAX;
 	int y = INT_MAX;
@@ -46,10 +85,9 @@ struct Element
 	/// Display order
 	int order = 0;
 
-	std::string xFormula = "";
-	std::string yFormula = "";
-	std::string wFormula = "";
-	std::string hFormula = "";
+	// keep props as pointer to minimize size.
+	// all unknown props will be stored here.
+	Properties properties;
 
 	/// defines inversion behaviour
 	bool TFTDMode = false;
