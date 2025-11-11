@@ -1527,7 +1527,7 @@ interfaces:
         color: 241   # pink
       - id: numbers
         color: 208   # white
-        color2: 208 
+        color2: 208
       - id: button
         color: 246   # purple
       - id: barTUs
@@ -2521,65 +2521,136 @@ interfaces:
         color: 6     # brown
       - id: errorMessage
         color: 239   # bright green
-      - id: globePosition
+      - id: globe
         pos: ["0","(screenHeight-height)/2"]
         size: ["screenWidth-64",screenHeight]
+        order: 2
+        class: Globe
+      - id: background
+        initScript: |
+          var int width
+          var int height
+          set width screenWidth
+          sub width 64
+          set height screenHeight
+
+          return 0 0 width height
+        class: Surface
+        src: "ALTGEOBORD.SCR"
+        pos: [0, 0]
+        size: ["srcWidth", "srcHeight"]
+        order: 0
+      - id: sideline
+        class: Surface
+        pos: ["screenWidth-width", 0]
+        size: [64, "screenHeight"]
+        order: 1
       - id: buttonIntercept
         pos: ["screenWidth-63","screenHeight/2-100"]
         size: [63,11]
+        order: 4
+        class: TextButton
       - id: buttonBases
         pos: ["screenWidth-63","screenHeight/2-88"]
         size: [63,11]
+        order: 5
+        class: TextButton
       - id: buttonGraphs
         pos: ["screenWidth-63","screenHeight/2-76"]
         size: [63,11]
+        order: 6
+        class: TextButton
       - id: buttonUfopaedia
         pos: ["screenWidth-63","screenHeight/2-64"]
         size: [63,11]
+        order: 7
+        class: TextButton
       - id: buttonOptions
         pos: ["screenWidth-63","screenHeight/2-52"]
         size: [63,11]
+        order: 8
+        class: TextButton
       - id: buttonFunding
         pos: ["screenWidth-63","screenHeight/2-40"]
         size: [63,11]
+        order: 9
+        class: TextButton
       - id: button5Secs
         pos: ["screenWidth-63","screenHeight/2+12"]
         size: [31,13]
+        order: 11
+        class: TextButton
       - id: button1Min
         pos: ["screenWidth-31","screenHeight/2+12"]
         size: [31,13]
+        order: 12
+        class: TextButton
       - id: button5Mins
         pos: ["screenWidth-63","screenHeight/2+26"]
         size: [31,13]
+        order: 13
+        class: TextButton
       - id: button30Mins
         pos: ["screenWidth-31","screenHeight/2+26"]
         size: [31,13]
+        order: 14
+        class: TextButton
       - id: button1Hour
         pos: ["screenWidth-63","screenHeight/2+40"]
         size: [31,13]
+        order: 15
+        class: TextButton
       - id: button1Day
         pos: ["screenWidth-31","screenHeight/2+40"]
         size: [31,13]
+        order: 16
+        class: TextButton
       - id: buttonRotateLeft
         pos: ["screenWidth-61","screenHeight/2+76"]
         size: [12,10]
+        order: 18
+        class: InteractiveSurface
       - id: buttonRotateRight
         pos: ["screenWidth-37","screenHeight/2+76"]
         size: [12,10]
+        order: 19
+        class: InteractiveSurface
       - id: buttonRotateUp
         pos: ["screenWidth-49","screenHeight/2+62"]
         size: [13,12]
+        order: 20
+        class: InteractiveSurface
       - id: buttonRotateDown
         pos: ["screenWidth-49","screenHeight/2+87"]
         size: [13,12]
+        order: 21
+        class: InteractiveSurface
       - id: buttonZoomIn
         pos: ["screenWidth-25","screenHeight/2+56"]
         size: [23,23]
+        order: 22
+        class: InteractiveSurface
       - id: buttonZoomOut
         pos: ["screenWidth-20","screenHeight/2+82"]
         size: [13,17]
+        order: 23
+        class: InteractiveSurface
       - id: zoomControls
+        positionScript: |
+          var int x
+          var int y
+          set x screenWidth
+          set y screenHeight
+          sub x 64
+
+          return x y
+
         pos: ["screenWidth-64","screenHeight/2+54"]
+        class: Surface
+        src:
+          name: "GEOBORD.SCR"
+          rect: ["x,y,w,h"]
+        order: 3
         size: [64,46]
   - type: geoscapeTimer
     elements:
@@ -2589,30 +2660,50 @@ interfaces:
       - id: txtHour
         pos: ["screenWidth-61","screenHeight/2-26"]
         size: [20,16]
+        order: 26
+        class: Text
       - id: txtHourSep
         pos: ["screenWidth-41","screenHeight/2-26"]
         size: [4,16]
+        order: 27
+        class: Text
       - id: txtMin
         pos: ["screenWidth-37","screenHeight/2-26"]
         size: [20,16]
+        order: 28
+        class: Text
       - id: txtMinSep
         pos: ["screenWidth-17","screenHeight/2-26"]
         size: [4,16]
+        order: 29
+        class: Text
       - id: txtSec
         pos: ["screenWidth-13","screenHeight/2-20"]
         size: [11,8]
+        order: 30
+        class: Text
       - id: txtWeekday
         pos: ["screenWidth-61","screenHeight/2-13"]
         size: [59,8]
+        order: 31
+        class: Text
       - id: txtDay
         pos: ["screenWidth-61","screenHeight/2-6"]
         size: [29,8]
+        order: 32
+        class: Text
       - id: txtMonth
         pos: ["screenWidth-32","screenHeight/2-6"]
         size: [29,8]
+        order: 33
+        class: Text
       - id: txtYear
         pos: ["screenWidth-61","screenHeight/2+1"]
         size: [59,8]
+        order: 34
+        class: Text
       - id: txtFunds
         pos: ["screenWidth-61","screenHeight/2-27"]
         size: [59,8]
+        order: 25
+        class: Text

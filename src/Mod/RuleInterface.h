@@ -117,6 +117,10 @@ public:
 	const Element *getElementOptional(const std::string &id) const;
 	/// Get an element.
 	const Element *getElement(const std::string &id) const;
+
+	/// Get all element.
+	const std::map <std::string, Element> &getAllElements() const;
+
 	/// Get palette.
 	const std::string &getPalette() const;
 	/// Get parent interface rule.

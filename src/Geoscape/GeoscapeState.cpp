@@ -134,17 +134,27 @@
 #include "../fmath.h"
 #include "../fallthrough.h"
 #include "../../libs/picomath/picomath.h"
+#include <iostream>
 
 namespace OpenXcom
 {
 	namespace {
-		std::tuple<int, int,int,int> evaluateElement(const Game* _game,const std::string& name,const std::string &interfaceName)
+		GeoscapeState::UISurface* evaluateElement(Game* _game,std::string_view name,std::string_view interfaceName)
 		{
 			picomath::PicoMath picomath;
 			picomath.addVariable("screenWidth") = Options::baseXGeoscape;
 			picomath.addVariable("screenHeight") = Options::baseYGeoscape;
 
-			auto element = _game->getMod()->getInterface(interfaceName)->getElement(name);
+			auto element = _game->getMod()->getInterface(interfaceName.data())->getElement(name.data());
+
+			auto srcSurfaceName = element->properties.Get("src");
+			if (!srcSurfaceName.empty())
+			{
+				Surface *srcSurface = _game->getMod()->getSurface(srcSurfaceName.data());
+
+				picomath.addVariable("srcWidth") = srcSurface->getWidth();
+				picomath.addVariable("srcHeight") = srcSurface->getHeight();
+			}
 
 			const auto &xDefinition = element->properties.Get("x");//element->xDefinition;
 			const auto &yDefinition = element->properties.Get("y");//element->yDefinition;
@@ -173,7 +183,39 @@ namespace OpenXcom
 			if(result.isOk())
 				y = result.getResult();
 
-			return {x,y,w,h};
+			Surface* elementInstnace;
+			auto elementClass = element->properties.Get("class");
+
+			if (elementClass == "Text")
+			{
+				elementInstnace = new Text(w, h, x, y);
+			}
+			else if (elementClass == "InteractiveSurface")
+			{
+				elementInstnace = new InteractiveSurface(w, h, x, y);
+			}
+			else if (elementClass == "TextButton")
+			{
+				elementInstnace = new TextButton(w, h, x, y);
+			}
+			else if (elementClass == "Surface")
+			{
+				elementInstnace = new TextButton(w, h, x, y);
+			}
+			else if (elementClass == "Globe") {
+				elementInstnace = new Globe(_game,w, h, x, y);
+			}
+			else {
+				// throw Exception("Unsupported UI element class '" + element->properties.Get("class") + "' in '" + interfaceName + "'");
+				return nullptr;
+			}
+
+
+			GeoscapeState::UISurface* uiSurface = new GeoscapeState::UISurface();
+			uiSurface->surface.reset(elementInstnace);
+			uiSurface->order = element->properties.Get("order") != "" ? std::stoi(std::string(element->properties.Get("order"))) : 0;
+			return uiSurface;
+
 		}
 	}
 /**
@@ -185,121 +227,132 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	int screenWidth = Options::baseXGeoscape;
 	int screenHeight = Options::baseYGeoscape;
 
-	// Create objects
-	Surface *hd = _game->getMod()->getSurface("ALTGEOBORD.SCR");
-	_bg = new Surface(hd->getWidth(), hd->getHeight(), 0, 0);
-	_sideLine = new Surface(64, screenHeight, screenWidth - 64, 0);
+	// Surface *hd = _game->getMod()->getSurface("ALTGEOBORD.SCR");
+	// _bg = new Surface(hd->getWidth(), hd->getHeight(), 0, 0);
 
-	auto[x,y,w,h] = evaluateElement(_game,"zoomControls","geoscape");
-	_zoomControls = new Surface(w,h,x,y);
+	// black sidebar under right menu
+	// _sideLine = new Surface(64, screenHeight, screenWidth - 64, 0);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"globePosition","geoscape");
-	auto element = _game->getMod()->getInterface("geoscape")->getElement("globePosition");
+	for(const auto& elementPair : _game->getMod()->getInterface("geoscape")->getAllElements())
+	{
+		const Element& element = elementPair.second;
+		if(element.properties.Get("class").empty())
+			continue;
 
-	_globe = new Globe(_game, w/2, h/2, w, h, x, y);
-	_bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
-	_bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
+		UISurface* uiSurface = evaluateElement(_game,elementPair.first,"geoscape");
+		_uiSurfaces.push_back(std::move(*uiSurface));
+	}
+
+	// auto[x,y,w,h] = evaluateElement(_game,"zoomControls","geoscape");
+	// _zoomControls = new Surface(w,h,x,y);
+
+	// std::tie(x,y,w,h) = evaluateElement(_game,"globePosition","geoscape");
+	// auto element = _game->getMod()->getInterface("geoscape")->getElement("globePosition");
+
+	// _globe = new Globe(_game, w/2, h/2, w, h, x, y);
+	// _bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
+	// _bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
 
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonIntercept","geoscape");
-	_btnIntercept = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonIntercept","geoscape");
+	// _btnIntercept = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonBases","geoscape");
-	_btnBases = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonBases","geoscape");
+	// _btnBases = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonGraphs","geoscape");
-	_btnUfopaedia = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonGraphs","geoscape");
+	// _btnUfopaedia = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonUfopaedia","geoscape");
-	_btnGraphs = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonUfopaedia","geoscape");
+	// _btnGraphs = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonOptions","geoscape");
-	_btnOptions = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonOptions","geoscape");
+	// _btnOptions = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonFunding","geoscape");
-	_btnFunding = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonFunding","geoscape");
+	// _btnFunding = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button5Secs","geoscape");
-	_btn5Secs = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button5Secs","geoscape");
+	// _btn5Secs = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button1Min","geoscape");
-	_btn1Min = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button1Min","geoscape");
+	// _btn1Min = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button5Mins","geoscape");
-	_btn5Mins = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button5Mins","geoscape");
+	// _btn5Mins = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button30Mins","geoscape");
-	_btn30Mins = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button30Mins","geoscape");
+	// _btn30Mins = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button1Hour","geoscape");
-	_btn1Hour = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button1Hour","geoscape");
+	// _btn1Hour = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"button1Day","geoscape");
-	_btn1Day = new TextButton(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"button1Day","geoscape");
+	// _btn1Day = new TextButton(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateLeft","geoscape");
-	_btnRotateLeft = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateLeft","geoscape");
+	// _btnRotateLeft = new InteractiveSurface(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateRight","geoscape");
-	_btnRotateRight = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateRight","geoscape");
+	// _btnRotateRight = new InteractiveSurface(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateUp","geoscape");
-	_btnRotateUp = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateUp","geoscape");
+	// _btnRotateUp = new InteractiveSurface(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateDown","geoscape");
-	_btnRotateDown = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonRotateDown","geoscape");
+	// _btnRotateDown = new InteractiveSurface(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomIn","geoscape");
-	_btnZoomIn = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomIn","geoscape");
+	// _btnZoomIn = new InteractiveSurface(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomOut","geoscape");
-	_btnZoomOut = new InteractiveSurface(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomOut","geoscape");
+	// _btnZoomOut = new InteractiveSurface(w, h, x, y);
 
 	int height = (screenHeight - Screen::ORIGINAL_HEIGHT) / 2 + 10;
-	_sideTop = new TextButton(63, height, screenWidth-63, _zoomControls->getY() - height - 1);
-	_sideBottom = new TextButton(63, height, screenWidth-63, _zoomControls->getY() + _zoomControls->getHeight() + 1);
+	// _sideTop = new TextButton(63, height, screenWidth-63, _zoomControls->getY() - height - 1);
+	// _sideBottom = new TextButton(63, height, screenWidth-63, _zoomControls->getY() + _zoomControls->getHeight() + 1);
 
 	//timer setup
 
 	// std::tie(x,y,w,h) = evaluateElement(_game,"timerBackground","geoscapeTimer");
 	// _timerBackground = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtHour","geoscapeTimer");
-	_txtHour = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtHour","geoscapeTimer");
+	// _txtHour = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtHourSep","geoscapeTimer");
-	_txtHourSep = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtHourSep","geoscapeTimer");
+	// _txtHourSep = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtMin","geoscapeTimer");
-	_txtMin = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtMin","geoscapeTimer");
+	// _txtMin = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtMinSep","geoscapeTimer");
-	_txtMinSep = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtMinSep","geoscapeTimer");
+	// _txtMinSep = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtSec","geoscapeTimer");
-	_txtSec = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtSec","geoscapeTimer");
+	// _txtSec = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtWeekday","geoscapeTimer");
-	_txtWeekday = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtWeekday","geoscapeTimer");
+	// _txtWeekday = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtDay","geoscapeTimer");
-	_txtDay = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtDay","geoscapeTimer");
+	// _txtDay = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtMonth","geoscapeTimer");
-	_txtMonth = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtMonth","geoscapeTimer");
+	// _txtMonth = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtYear","geoscapeTimer");
-	_txtYear = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtYear","geoscapeTimer");
+	// _txtYear = new Text(w, h, x, y);
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"txtFunds","geoscapeTimer");
-	_txtFunds = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"txtFunds","geoscapeTimer");
+	// _txtFunds = new Text(w, h, x, y);
 	//timer end
 
 
-	std::tie(x,y,w,h) = evaluateElement(_game,"slackingIndicator","geoscape");
-	_txtSlacking = new Text(w, h, x, y);
-	std::tie(x,y,w,h) = evaluateElement(_game,"trainingIndicator","geoscape");
-	_txtTraining = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"slackingIndicator","geoscape");
+	// _txtSlacking = new Text(w, h, x, y);
+	// std::tie(x,y,w,h) = evaluateElement(_game,"trainingIndicator","geoscape");
+	// _txtTraining = new Text(w, h, x, y);
 
 	_timeSpeed = _btn5Secs;
 	_gameTimer = new Timer(Options::geoClockSpeed);

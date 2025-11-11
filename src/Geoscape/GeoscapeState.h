@@ -45,7 +45,15 @@ class AlienBase;
  */
 class GeoscapeState : public State
 {
+public:
+	struct UISurface
+	{
+			std::unique_ptr<Surface> surface;
+			int order;
+	};
 private:
+	std::vector<UISurface> _uiSurfaces;
+
 	Surface *_bg, *_sideLine, *_zoomControls;
 	Globe *_globe;
 	TextButton *_btnIntercept, *_btnBases, *_btnGraphs, *_btnUfopaedia, *_btnOptions, *_btnFunding;

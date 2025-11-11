@@ -195,4 +195,9 @@ int RuleInterface::getSound() const
 	return _sound;
 }
 
+const std::map <std::string, Element> &RuleInterface::getAllElements() const
+{
+	return _elements;
+}
+
 }
