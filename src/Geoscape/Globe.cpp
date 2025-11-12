@@ -414,8 +414,8 @@ void Globe::polarToCart(double lon, double lat, double *x, double *y) const
 void Globe::cartToPolar(Sint16 x, Sint16 y, double *lon, double *lat) const
 {
 	// Orthographic projection
-	x -= _cenX;
-	y -= _cenY;
+	x = x - getX() - _cenX;
+	y = y - getY() - _cenY;
 
 	double rho = sqrt((double)(x*x + y*y));
 	double c = asin(rho / _radius);
