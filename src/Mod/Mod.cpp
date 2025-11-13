@@ -3465,7 +3465,7 @@ void Mod::loadFile(const FileMap::FileRecord &filerec, ModScript &parsers)
 		RuleInterface *rule = loadRule(ruleReader, &_interfaces);
 		if (rule != 0)
 		{
-			rule->load(ruleReader, this);
+			rule->load(ruleReader, this,parsers);
 		}
 	}
 

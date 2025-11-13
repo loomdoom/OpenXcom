@@ -90,6 +90,7 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod, const Mod
 			layoutElement._layoutElementScripts.load(id, layoutElementReader, parsers.layoutElementScripts);
 			layoutElementReader.tryRead("class", layoutElement.className);
 			layoutElementReader.tryRead("element", layoutElement.element);
+			layoutElementReader.tryRead("order", layoutElement.order);
 		}
 	}
 }

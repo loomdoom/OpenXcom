@@ -83,7 +83,6 @@ endif ()
 
 # Include rapidyaml lib
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
-include_directories(${CMAKE_SOURCE_DIR}/libs/picomath)
 
 if(NOT UNIX AND IS_DIRECTORY ${DEPS_DIR})
    include_directories ( ${DEPS_DIR}/include/SDL ${DEPS_DIR}/include )

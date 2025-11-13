@@ -133,91 +133,19 @@
 #include "../Mod/Texture.h"
 #include "../fmath.h"
 #include "../fallthrough.h"
-#include "../../libs/picomath/picomath.h"
 #include <iostream>
 
 namespace OpenXcom
 {
-	namespace {
-		GeoscapeState::UISurface* evaluateElement(Game* _game,std::string_view name,std::string_view interfaceName)
-		{
-			picomath::PicoMath picomath;
-			picomath.addVariable("screenWidth") = Options::baseXGeoscape;
-			picomath.addVariable("screenHeight") = Options::baseYGeoscape;
-
-			auto element = _game->getMod()->getInterface(interfaceName.data())->getElement(name.data());
-
-			auto srcSurfaceName = element->properties.Get("src");
-			if (!srcSurfaceName.empty())
-			{
-				Surface *srcSurface = _game->getMod()->getSurface(srcSurfaceName.data());
-
-				picomath.addVariable("srcWidth") = srcSurface->getWidth();
-				picomath.addVariable("srcHeight") = srcSurface->getHeight();
-			}
-
-			const auto &xDefinition = element->properties.Get("x");//element->xDefinition;
-			const auto &yDefinition = element->properties.Get("y");//element->yDefinition;
-			const auto &wDefinition = element->properties.Get("w");//element->wFormula;
-			const auto &hDefinition = element->properties.Get("h");//element->hFormula;
-
-			int x; int y; int w; int h;
-
-
-			auto result = picomath.evalExpression(wDefinition.data());
-			if(result.isOk())
-				w = result.getResult();
-
-			result = picomath.evalExpression(hDefinition.data());
-			if(result.isOk())
-				h = result.getResult();
-
-			picomath.addVariable("width") = w;
-			picomath.addVariable("height") = h;
-
-			result = picomath.evalExpression(xDefinition.data());
-			if(result.isOk())
-				x = result.getResult();
-
-			result = picomath.evalExpression(yDefinition.data());
-			if(result.isOk())
-				y = result.getResult();
-
-			Surface* elementInstnace;
-			auto elementClass = element->properties.Get("class");
-
-			if (elementClass == "Text")
-			{
-				elementInstnace = new Text(w, h, x, y);
-			}
-			else if (elementClass == "InteractiveSurface")
-			{
-				elementInstnace = new InteractiveSurface(w, h, x, y);
-			}
-			else if (elementClass == "TextButton")
-			{
-				elementInstnace = new TextButton(w, h, x, y);
-			}
-			else if (elementClass == "Surface")
-			{
-				elementInstnace = new TextButton(w, h, x, y);
-			}
-			else if (elementClass == "Globe") {
-				elementInstnace = new Globe(_game,w, h, x, y);
-			}
-			else {
-				// throw Exception("Unsupported UI element class '" + element->properties.Get("class") + "' in '" + interfaceName + "'");
-				return nullptr;
-			}
-
-
-			GeoscapeState::UISurface* uiSurface = new GeoscapeState::UISurface();
-			uiSurface->surface.reset(elementInstnace);
-			uiSurface->order = element->properties.Get("order") != "" ? std::stoi(std::string(element->properties.Get("order"))) : 0;
-			return uiSurface;
-
-		}
-	}
+    namespace
+    {
+        enum GEOSCAPE_DRAW_ORDER
+        {
+            BACKGROUND = 0,
+            GLOBE=1,
+            REST=2
+        };
+    }
 /**
  * Initializes all the elements in the Geoscape screen.
  * @param game Pointer to the core game.
@@ -227,21 +155,88 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	int screenWidth = Options::baseXGeoscape;
 	int screenHeight = Options::baseYGeoscape;
 
-	// Surface *hd = _game->getMod()->getSurface("ALTGEOBORD.SCR");
-	// _bg = new Surface(hd->getWidth(), hd->getHeight(), 0, 0);
+    // background - mandatory
+    {
+        auto *altgeobord = _game->getMod()->getSurface("ALTGEOBORD.SCR");
+        int w = altgeobord->getWidth();
+        int h = altgeobord->getHeight();
+        _bg = new Surface(w,h,0,0);
+        altgeobord->blitNShade(_bg, 0, 0);
+        GeoscapeState::UISurface uiSurface;
+        uiSurface.surface = _bg;
+        uiSurface.order = GEOSCAPE_DRAW_ORDER::BACKGROUND; //always first/bottom
+        _uiSurfaces.push_back(std::move(uiSurface));
+    }
 
 	// black sidebar under right menu
 	// _sideLine = new Surface(64, screenHeight, screenWidth - 64, 0);
 
-	for(const auto& elementPair : _game->getMod()->getInterface("geoscape")->getAllElements())
+	for(const auto& elementPair : _game->getMod()->getInterface("geoscape")->getLayoutElements())
 	{
-		const Element& element = elementPair.second;
-		if(element.properties.Get("class").empty())
-			continue;
+		const LayoutElement* layoutElement = &elementPair.second;
+		// call script which can adjust values.
+		int w,h,x,y;
 
-		UISurface* uiSurface = evaluateElement(_game,elementPair.first,"geoscape");
-		_uiSurfaces.push_back(std::move(*uiSurface));
+		ModScript::LayoutElementSize::Output args{ w, h };
+		ModScript::LayoutElementSize::Worker work{ layoutElement ,screenWidth,screenHeight};
+		work.execute(layoutElement->getScript<ModScript::LayoutElementSize>(), args);
+		w = std::get<0>(args.data);
+		h = std::get<1>(args.data);
+
+		ModScript::LayoutElementPosition::Output argsPos{ x, y };
+		ModScript::LayoutElementPosition::Worker workPos{ layoutElement ,w,h,screenWidth,screenHeight};
+		workPos.execute(layoutElement->getScript<ModScript::LayoutElementPosition>(), argsPos);
+
+		x = std::get<0>(argsPos.data);
+		y = std::get<1>(argsPos.data);
+
+		GeoscapeState::UISurface uiSurface;
+        uiSurface.layoutElement = layoutElement;
+
+        //  globe - mandatory but can have position or size modified
+		if(elementPair.first == "globe") {
+			_globe = new Globe(_game,x+ w/2, y+h/2,w,h, x, y);
+            uiSurface.surface = _globe;
+            uiSurface.order = GEOSCAPE_DRAW_ORDER::GLOBE;
+		}
+		else {
+			if(layoutElement->className.empty())
+				continue;
+
+			if (layoutElement->className == "Text")
+			{
+                 uiSurface.surface = new Text(w, h, x, y);
+			}
+			else if (layoutElement->className == "InteractiveSurface")
+			{
+				uiSurface.surface = new InteractiveSurface(w, h, x, y);
+			}
+			else if (layoutElement->className == "TextButton")
+			{
+				uiSurface.surface = new TextButton(w, h, x, y);
+			}
+			else if (layoutElement->className == "Surface")
+			{
+				uiSurface.surface = new Surface(w, h, x, y);
+                if(elementPair.first == "sideline")
+                {
+                    uiSurface.surface->drawRect(0, 0, w, h, 15);
+                }
+			}
+            uiSurface.order = GEOSCAPE_DRAW_ORDER::REST+layoutElement->order;
+		}
+
+
+		uiSurface.element = layoutElement->element;
+
+		_uiSurfaces.push_back(std::move(uiSurface));
 	}
+
+	// Sort UI surfaces by order
+	std::sort(_uiSurfaces.begin(), _uiSurfaces.end(),
+		[](const GeoscapeState::UISurface& a, const GeoscapeState::UISurface& b) {
+			return a.order < b.order;
+		});
 
 	// auto[x,y,w,h] = evaluateElement(_game,"zoomControls","geoscape");
 	// _zoomControls = new Surface(w,h,x,y);
@@ -541,8 +536,8 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 
 	// _btnRotateUp->onMousePress((ActionHandler)&GeoscapeState::btnRotateUpPress);
 	// _btnRotateUp->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease);
-	_btnRotateUp->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateUpPress, Options::keyGeoUp);
-	_btnRotateUp->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease, Options::keyGeoUp);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateUpPress, Options::keyGeoUp);
+	_globe->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease, Options::keyGeoUp);
 
 	// _btnRotateDown->onMousePress((ActionHandler)&GeoscapeState::btnRotateDownPress);
 	// _btnRotateDown->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateDownRelease);
