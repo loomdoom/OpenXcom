@@ -362,214 +362,225 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_dogfightStartTimer = new Timer(Options::dogfightSpeed);
 	_dogfightTimer = new Timer(Options::dogfightSpeed);
 
-	_txtDebug = new Text(254, 32, 0, 0);
-	_cbxRegion = new ComboBox(this, 150, 16, 0, 36);
-	_cbxZone = new ComboBox(this, 48, 16, 154, 36);
-	_cbxArea = new ComboBox(this, 48, 16, 206, 36);
-	_cbxCountry = new ComboBox(this, 150, 16, 0, 36);
+	// _txtDebug = new Text(254, 32, 0, 0);
+	// _cbxRegion = new ComboBox(this, 150, 16, 0, 36);
+	// _cbxZone = new ComboBox(this, 48, 16, 154, 36);
+	// _cbxArea = new ComboBox(this, 48, 16, 206, 36);
+	// _cbxCountry = new ComboBox(this, 150, 16, 0, 36);
 
 	// Set palette
 	setInterface("geoscape");
 
-	add(_bg);
-	// add(_sideLine);
-	add(_globe);
-	add(_zoomControls);
+	for(const auto& uiSurface : _uiSurfaces)
+	{
+		if(uiSurface.element.empty())
+		{
+			add(uiSurface.surface);
+		}
+		else
+		{
+			add(uiSurface.surface,uiSurface.element,"geoscape");
+		}
+	}
 
-	add(_btnIntercept, "button", "geoscape");
-	add(_btnBases, "button", "geoscape");
-	add(_btnGraphs, "button", "geoscape");
-	add(_btnUfopaedia, "button", "geoscape");
-	add(_btnOptions, "button", "geoscape");
-	add(_btnFunding, "button", "geoscape");
+	// add(_bg);
+	// // add(_sideLine);
+	// add(_globe);
+	// add(_zoomControls);
 
-	add(_btn5Secs, "button", "geoscape");
-	add(_btn1Min, "button", "geoscape");
-	add(_btn5Mins, "button", "geoscape");
-	add(_btn30Mins, "button", "geoscape");
-	add(_btn1Hour, "button", "geoscape");
-	add(_btn1Day, "button", "geoscape");
+	// add(_btnIntercept, "button", "geoscape");
+	// add(_btnBases, "button", "geoscape");
+	// add(_btnGraphs, "button", "geoscape");
+	// add(_btnUfopaedia, "button", "geoscape");
+	// add(_btnOptions, "button", "geoscape");
+	// add(_btnFunding, "button", "geoscape");
 
-	add(_btnRotateLeft);
-	add(_btnRotateRight);
-	add(_btnRotateUp);
-	add(_btnRotateDown);
-	add(_btnZoomIn);
-	add(_btnZoomOut);
+	// add(_btn5Secs, "button", "geoscape");
+	// add(_btn1Min, "button", "geoscape");
+	// add(_btn5Mins, "button", "geoscape");
+	// add(_btn30Mins, "button", "geoscape");
+	// add(_btn1Hour, "button", "geoscape");
+	// add(_btn1Day, "button", "geoscape");
 
-	// add(_sideTop, "button", "geoscape");
-	// add(_sideBottom, "button", "geoscape");
+	// add(_btnRotateLeft);
+	// add(_btnRotateRight);
+	// add(_btnRotateUp);
+	// add(_btnRotateDown);
+	// add(_btnZoomIn);
+	// add(_btnZoomOut);
 
-	add(_txtFunds, "text", "geoscape");
-	add(_txtHour, "text", "geoscape");
-	add(_txtHourSep, "text", "geoscape");
-	add(_txtMin, "text", "geoscape");
-	add(_txtMinSep, "text", "geoscape");
-	add(_txtSec, "text", "geoscape");
-	add(_txtWeekday, "text", "geoscape");
-	add(_txtDay, "text", "geoscape");
-	add(_txtMonth, "text", "geoscape");
-	add(_txtYear, "text", "geoscape");
-	add(_txtSlacking, "slackingIndicator", "geoscape");
-	add(_txtTraining, "trainingIndicator", "geoscape");
+	// // add(_sideTop, "button", "geoscape");
+	// // add(_sideBottom, "button", "geoscape");
 
-	add(_txtDebug, "text", "geoscape");
-	add(_cbxRegion, "button", "geoscape");
-	add(_cbxZone, "button", "geoscape");
-	add(_cbxArea, "button", "geoscape");
-	add(_cbxCountry, "button", "geoscape");
+	// add(_txtFunds, "text", "geoscape");
+	// add(_txtHour, "text", "geoscape");
+	// add(_txtHourSep, "text", "geoscape");
+	// add(_txtMin, "text", "geoscape");
+	// add(_txtMinSep, "text", "geoscape");
+	// add(_txtSec, "text", "geoscape");
+	// add(_txtWeekday, "text", "geoscape");
+	// add(_txtDay, "text", "geoscape");
+	// add(_txtMonth, "text", "geoscape");
+	// add(_txtYear, "text", "geoscape");
+	// add(_txtSlacking, "slackingIndicator", "geoscape");
+	// add(_txtTraining, "trainingIndicator", "geoscape");
+
+	// add(_txtDebug, "text", "geoscape");
+	// add(_cbxRegion, "button", "geoscape");
+	// add(_cbxZone, "button", "geoscape");
+	// add(_cbxArea, "button", "geoscape");
+	// add(_cbxCountry, "button", "geoscape");
 
 	// create zoom controls (extract from geobrd)
-	Surface *geobord = _game->getMod()->getSurface("GEOBORD.SCR");
-	geobord->setX(_zoomControls->getX() - geobord->getWidth() + _zoomControls->getWidth());
-	geobord->setY(_zoomControls->getY()-72-68-14); // -daytime
-	_zoomControls->copy(geobord);
+	// Surface *geobord = _game->getMod()->getSurface("GEOBORD.SCR");
+	// geobord->setX(_zoomControls->getX() - geobord->getWidth() + _zoomControls->getWidth());
+	// geobord->setY(_zoomControls->getY()-72-68-14); // -daytime
+	// _zoomControls->copy(geobord);
 
+	// _game->getMod()->getSurface("ALTGEOBORD.SCR")->blitNShade(_bg, 0, 0);
 
-	_game->getMod()->getSurface("ALTGEOBORD.SCR")->blitNShade(_bg, 0, 0);
+	// _sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
 
-	_sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
+	// _btnIntercept->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnIntercept->setText(tr("STR_INTERCEPT"));
+	// _btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, Options::keyGeoUfoTracker);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTechTreeViewerClick, Options::keyGeoTechTreeViewer);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalProductionClick, Options::keyGeoGlobalProduction);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalResearchClick, Options::keyGeoGlobalResearch);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalAlienContainmentClick, Options::keyGeoGlobalAlienContainment);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnDogfightExperienceClick, Options::keyGeoDailyPilotExperience);
+	// _btnIntercept->setGeoscapeButton(true);
 
-	_btnIntercept->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnIntercept->setText(tr("STR_INTERCEPT"));
-	_btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, Options::keyGeoIntercept);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfoTrackerClick, Options::keyGeoUfoTracker);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnTechTreeViewerClick, Options::keyGeoTechTreeViewer);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnSelectMusicTrackClick, Options::keySelectMusicTrack);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalProductionClick, Options::keyGeoGlobalProduction);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalResearchClick, Options::keyGeoGlobalResearch);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnGlobalAlienContainmentClick, Options::keyGeoGlobalAlienContainment);
-	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnDogfightExperienceClick, Options::keyGeoDailyPilotExperience);
-	_btnIntercept->setGeoscapeButton(true);
+	// _btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnBases->setText(tr("STR_BASES"));
+	// _btnBases->onMouseClick((ActionHandler)&GeoscapeState::btnBasesClick);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnBasesClick, Options::keyGeoBases);
+	// _btnBases->setGeoscapeButton(true);
 
-	_btnBases->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnBases->setText(tr("STR_BASES"));
-	_btnBases->onMouseClick((ActionHandler)&GeoscapeState::btnBasesClick);
-	_btnBases->onKeyboardPress((ActionHandler)&GeoscapeState::btnBasesClick, Options::keyGeoBases);
-	_btnBases->setGeoscapeButton(true);
+	// _btnGraphs->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnGraphs->setText(tr("STR_GRAPHS"));
+	// _btnGraphs->onMouseClick((ActionHandler)&GeoscapeState::btnGraphsClick);
+	// _globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnGraphsClick, Options::keyGeoGraphs);
+	// _btnGraphs->setGeoscapeButton(true);
 
-	_btnGraphs->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnGraphs->setText(tr("STR_GRAPHS"));
-	_btnGraphs->onMouseClick((ActionHandler)&GeoscapeState::btnGraphsClick);
-	_btnGraphs->onKeyboardPress((ActionHandler)&GeoscapeState::btnGraphsClick, Options::keyGeoGraphs);
-	_btnGraphs->setGeoscapeButton(true);
+	// _btnUfopaedia->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnUfopaedia->setText(tr("STR_UFOPAEDIA_UC"));
+	// _btnUfopaedia->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
+	// _btnUfopaedia->setGeoscapeButton(true);
 
-	_btnUfopaedia->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnUfopaedia->setText(tr("STR_UFOPAEDIA_UC"));
-	_btnUfopaedia->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
-	_btnUfopaedia->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, Options::keyGeoUfopedia);
-	_btnUfopaedia->setGeoscapeButton(true);
+	// _btnOptions->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnOptions->setText(tr("STR_OPTIONS_UC"));
+	// _btnOptions->onMouseClick((ActionHandler)&GeoscapeState::btnOptionsClick);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnOptionsClick, Options::keyGeoOptions);
+	// _btnOptions->setGeoscapeButton(true);
 
-	_btnOptions->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnOptions->setText(tr("STR_OPTIONS_UC"));
-	_btnOptions->onMouseClick((ActionHandler)&GeoscapeState::btnOptionsClick);
-	_btnOptions->onKeyboardPress((ActionHandler)&GeoscapeState::btnOptionsClick, Options::keyGeoOptions);
-	_btnOptions->setGeoscapeButton(true);
+	// _btnFunding->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btnFunding->setText(Options::oxceLinks ? tr("STR_EXTENDED_UC") : tr("STR_FUNDING_UC"));
+	// _btnFunding->onMouseClick((ActionHandler)&GeoscapeState::btnFundingClick);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnFundingClick, Options::keyGeoFunding);
+	// _btnFunding->setGeoscapeButton(true);
 
-	_btnFunding->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btnFunding->setText(Options::oxceLinks ? tr("STR_EXTENDED_UC") : tr("STR_FUNDING_UC"));
-	_btnFunding->onMouseClick((ActionHandler)&GeoscapeState::btnFundingClick);
-	_btnFunding->onKeyboardPress((ActionHandler)&GeoscapeState::btnFundingClick, Options::keyGeoFunding);
-	_btnFunding->setGeoscapeButton(true);
+	// _btn5Secs->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn5Secs->setBig();
+	// _btn5Secs->setText(tr("STR_5_SECONDS"));
+	// _btn5Secs->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed1);
+	// _btn5Secs->setGeoscapeButton(true);
 
-	_btn5Secs->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn5Secs->setBig();
-	_btn5Secs->setText(tr("STR_5_SECONDS"));
-	_btn5Secs->setGroup(&_timeSpeed);
-	_btn5Secs->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed1);
-	_btn5Secs->setGeoscapeButton(true);
+	// _btn1Min->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn1Min->setBig();
+	// _btn1Min->setText(tr("STR_1_MINUTE"));
+	// _btn1Min->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed2);
+	// _btn1Min->setGeoscapeButton(true);
 
-	_btn1Min->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn1Min->setBig();
-	_btn1Min->setText(tr("STR_1_MINUTE"));
-	_btn1Min->setGroup(&_timeSpeed);
-	_btn1Min->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed2);
-	_btn1Min->setGeoscapeButton(true);
+	// _btn5Mins->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn5Mins->setBig();
+	// _btn5Mins->setText(tr("STR_5_MINUTES"));
+	// _btn5Mins->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed3);
+	// _btn5Mins->setGeoscapeButton(true);
 
-	_btn5Mins->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn5Mins->setBig();
-	_btn5Mins->setText(tr("STR_5_MINUTES"));
-	_btn5Mins->setGroup(&_timeSpeed);
-	_btn5Mins->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed3);
-	_btn5Mins->setGeoscapeButton(true);
+	// _btn30Mins->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn30Mins->setBig();
+	// _btn30Mins->setText(tr("STR_30_MINUTES"));
+	// _btn30Mins->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed4);
+	// _btn30Mins->setGeoscapeButton(true);
 
-	_btn30Mins->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn30Mins->setBig();
-	_btn30Mins->setText(tr("STR_30_MINUTES"));
-	_btn30Mins->setGroup(&_timeSpeed);
-	_btn30Mins->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed4);
-	_btn30Mins->setGeoscapeButton(true);
+	// _btn1Hour->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn1Hour->setBig();
+	// _btn1Hour->setText(tr("STR_1_HOUR"));
+	// _btn1Hour->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed5);
+	// _btn1Hour->setGeoscapeButton(true);
 
-	_btn1Hour->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn1Hour->setBig();
-	_btn1Hour->setText(tr("STR_1_HOUR"));
-	_btn1Hour->setGroup(&_timeSpeed);
-	_btn1Hour->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed5);
-	_btn1Hour->setGeoscapeButton(true);
+	// _btn1Day->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+	// _btn1Day->setBig();
+	// _btn1Day->setText(tr("STR_1_DAY"));
+	// _btn1Day->setGroup(&_timeSpeed);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed6);
+	// _btn1Day->setGeoscapeButton(true);
 
-	_btn1Day->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-	_btn1Day->setBig();
-	_btn1Day->setText(tr("STR_1_DAY"));
-	_btn1Day->setGroup(&_timeSpeed);
-	_btn1Day->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, Options::keyGeoSpeed6);
-	_btn1Day->setGeoscapeButton(true);
+	// _sideBottom->setGeoscapeButton(true);
+	// _sideTop->setGeoscapeButton(true);
 
-	_sideBottom->setGeoscapeButton(true);
-	_sideTop->setGeoscapeButton(true);
+	// _btnRotateLeft->onMousePress((ActionHandler)&GeoscapeState::btnRotateLeftPress);
+	// _btnRotateLeft->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateLeftRelease);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateLeftPress, Options::keyGeoLeft);
+	_globe->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateLeftRelease, Options::keyGeoLeft);
 
-	_btnRotateLeft->onMousePress((ActionHandler)&GeoscapeState::btnRotateLeftPress);
-	_btnRotateLeft->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateLeftRelease);
-	_btnRotateLeft->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateLeftPress, Options::keyGeoLeft);
-	_btnRotateLeft->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateLeftRelease, Options::keyGeoLeft);
+	// _btnRotateRight->onMousePress((ActionHandler)&GeoscapeState::btnRotateRightPress);
+	// _btnRotateRight->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateRightRelease);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateRightPress, Options::keyGeoRight);
+	_globe->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateRightRelease, Options::keyGeoRight);
 
-	_btnRotateRight->onMousePress((ActionHandler)&GeoscapeState::btnRotateRightPress);
-	_btnRotateRight->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateRightRelease);
-	_btnRotateRight->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateRightPress, Options::keyGeoRight);
-	_btnRotateRight->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateRightRelease, Options::keyGeoRight);
-
-	_btnRotateUp->onMousePress((ActionHandler)&GeoscapeState::btnRotateUpPress);
-	_btnRotateUp->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease);
+	// _btnRotateUp->onMousePress((ActionHandler)&GeoscapeState::btnRotateUpPress);
+	// _btnRotateUp->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease);
 	_btnRotateUp->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateUpPress, Options::keyGeoUp);
 	_btnRotateUp->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateUpRelease, Options::keyGeoUp);
 
-	_btnRotateDown->onMousePress((ActionHandler)&GeoscapeState::btnRotateDownPress);
-	_btnRotateDown->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateDownRelease);
-	_btnRotateDown->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateDownPress, Options::keyGeoDown);
-	_btnRotateDown->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateDownRelease, Options::keyGeoDown);
+	// _btnRotateDown->onMousePress((ActionHandler)&GeoscapeState::btnRotateDownPress);
+	// _btnRotateDown->onMouseRelease((ActionHandler)&GeoscapeState::btnRotateDownRelease);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnRotateDownPress, Options::keyGeoDown);
+	_globe->onKeyboardRelease((ActionHandler)&GeoscapeState::btnRotateDownRelease, Options::keyGeoDown);
 
-	_btnZoomIn->onMouseClick((ActionHandler)&GeoscapeState::btnZoomInLeftClick, SDL_BUTTON_LEFT);
-	_btnZoomIn->onMouseClick((ActionHandler)&GeoscapeState::btnZoomInRightClick, SDL_BUTTON_RIGHT);
-	_btnZoomIn->onKeyboardPress((ActionHandler)&GeoscapeState::btnZoomInLeftClick, Options::keyGeoZoomIn);
+	// _btnZoomIn->onMouseClick((ActionHandler)&GeoscapeState::btnZoomInLeftClick, SDL_BUTTON_LEFT);
+	// _btnZoomIn->onMouseClick((ActionHandler)&GeoscapeState::btnZoomInRightClick, SDL_BUTTON_RIGHT);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnZoomInLeftClick, Options::keyGeoZoomIn);
 
-	_btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, SDL_BUTTON_LEFT);
-	_btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutRightClick, SDL_BUTTON_RIGHT);
-	_btnZoomOut->onKeyboardPress((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, Options::keyGeoZoomOut);
+	// _btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, SDL_BUTTON_LEFT);
+	// _btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutRightClick, SDL_BUTTON_RIGHT);
+	_globe->onKeyboardPress((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, Options::keyGeoZoomOut);
 
-	_txtFunds->setAlign(ALIGN_CENTER);
-	_txtFunds->setVisible(Options::showFundsOnGeoscape);
+	// _txtFunds->setAlign(ALIGN_CENTER);
+	// _txtFunds->setVisible(Options::showFundsOnGeoscape);
 
-	_txtHour->setBig();
-	_txtHour->setAlign(ALIGN_RIGHT);
+	// _txtHour->setBig();
+	// _txtHour->setAlign(ALIGN_RIGHT);
 
-	_txtHourSep->setBig();
-	_txtHourSep->setText(":");
+	// _txtHourSep->setBig();
+	// _txtHourSep->setText(":");
 
-	_txtMin->setBig();
+	// _txtMin->setBig();
 
-	_txtMinSep->setBig();
-	_txtMinSep->setText(":");
+	// _txtMinSep->setBig();
+	// _txtMinSep->setText(":");
 
-	_txtWeekday->setAlign(ALIGN_CENTER);
+	// _txtWeekday->setAlign(ALIGN_CENTER);
 
-	_txtDay->setAlign(ALIGN_CENTER);
+	// _txtDay->setAlign(ALIGN_CENTER);
 
-	_txtMonth->setAlign(ALIGN_CENTER);
+	// _txtMonth->setAlign(ALIGN_CENTER);
 
-	_txtYear->setAlign(ALIGN_CENTER);
+	// _txtYear->setAlign(ALIGN_CENTER);
 
-	_txtSlacking->setAlign(ALIGN_RIGHT);
-	_txtTraining->setAlign(ALIGN_RIGHT);
+	// _txtSlacking->setAlign(ALIGN_RIGHT);
+	// _txtTraining->setAlign(ALIGN_RIGHT);
 
 	if (Options::showFundsOnGeoscape)
 	{

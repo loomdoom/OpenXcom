@@ -59,6 +59,8 @@ class BattleUnitVisibility;
 class BattleItem;
 struct StatAdjustment;
 
+struct LayoutElement;
+
 class Ufo;
 class RuleUfo;
 class Craft;
@@ -88,8 +90,29 @@ class ModScript
 	using Output = ScriptOutputArgs<int&, int>;
 
 	////////////////////////////////////////////////////////////
-	//					geoscape script
+	//					layout scripts
 	////////////////////////////////////////////////////////////
+
+	struct LayoutElementPositionParser : ScriptParserEvents<ScriptOutputArgs<int&, int&>, const LayoutElement*,int,int,int,int>
+	{
+		LayoutElementPositionParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
+	struct LayoutElementSizeParser : ScriptParserEvents<ScriptOutputArgs<int&, int&>, const LayoutElement*,int,int>
+	{
+		LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
+
+
+	// struct LayoutElementPositionParser : ScriptParserEvents<ScriptOutputArgs<int&,int&>, const LayoutElement*,int,int,int,int>
+	// {
+	// 	LayoutElementPositionParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	// };
+
+	// struct LayoutElementSizeParser : ScriptParserEvents<ScriptOutputArgs<int&,int&>, const LayoutElement*>
+	// {
+	// 	LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	// };
 
 	////////////////////////////////////////////////////////////
 	//					unit script
@@ -332,6 +355,12 @@ public:
 	using BonusStatsCommon = BonusStatsBaseParser;
 
 	////////////////////////////////////////////////////////////
+	//					layout scripts
+	////////////////////////////////////////////////////////////
+	using LayoutElementPosition = MACRO_NAMED_SCRIPT("positionScript", LayoutElementPositionParser);
+	using LayoutElementSize = MACRO_NAMED_SCRIPT("sizeScript", LayoutElementSizeParser);
+
+	////////////////////////////////////////////////////////////
 	//					unit script
 	////////////////////////////////////////////////////////////
 
@@ -451,6 +480,11 @@ public:
 	//					groups
 	////////////////////////////////////////////////////////////
 
+	using LayoutElementScripts = ScriptGroup<Mod,
+		LayoutElementPosition,
+		LayoutElementSize
+	>;
+
 	using BattleUnitScripts = ScriptGroup<Mod,
 		RecolorUnitSprite,
 		SelectUnitSprite,
@@ -554,6 +588,7 @@ public:
 	////////////////////////////////////////////////////////////
 	//					members
 	////////////////////////////////////////////////////////////
+	LayoutElementScripts layoutElementScripts = { _shared, _mod, "element" };
 	BattleUnitScripts battleUnitScripts = { _shared, _mod, "unit" };
 	BattleItemScripts battleItemScripts = { _shared, _mod, "item" };
 	BonusStatsScripts bonusStatsScripts = { _shared, _mod, "bonuses" };

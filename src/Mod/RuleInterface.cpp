@@ -21,6 +21,7 @@
 #include "Mod.h"
 #include <climits>
 #include "../Savegame/SavedGame.h"
+#include "../Engine/ScriptBind.h"
 
 namespace OpenXcom
 {
@@ -42,11 +43,11 @@ RuleInterface::~RuleInterface()
  * Loads the elements from a YAML file.
  * @param node YAML node.
  */
-void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod)
+void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod, const ModScript& parsers)
 {
 	if (const auto& parent = reader["refNode"])
 	{
-		load(parent, mod);
+		load(parent, mod, parsers);
 	}
 
 	reader.tryRead("palette", _palette);
@@ -59,73 +60,36 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod)
 	for (const auto& elementReader : reader["elements"].children())
 	{
 		Element& element = _elements[elementReader["id"].readVal<std::string>()];
-
-		for (auto propertyReader  : elementReader.children())
+		if (elementReader["size"])
 		{
-			auto k = propertyReader.key();
-			if(k == "id")
-			{
-				continue;
-			}
-			else if(k == "size")
-			{
-				std::pair<std::string,std::string> values;
-				propertyReader.tryReadVal(values);
-				bool isWInteger = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
-				bool isHInteger = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
-				if (isWInteger && isHInteger)
-				{
-					//for backwards compatibility
-					element.w = std::stoi(values.first);
-					element.h = std::stoi(values.second);
-				}
+			std::pair<int, int> pos = elementReader["size"].readVal<std::pair<int, int> >();
+			element.w = pos.first;
+			element.h = pos.second;
+		}
+		if (elementReader["pos"])
+		{
+			std::pair<int, int> pos = elementReader["pos"].readVal<std::pair<int, int> >();
+			element.x = pos.first;
+			element.y = pos.second;
+		}
+		elementReader.tryRead("color", element.color);
+		elementReader.tryRead("color2", element.color2);
+		elementReader.tryRead("border", element.border);
+		elementReader.tryRead("custom", element.custom);
+		elementReader.tryRead("TFTDMode", element.TFTDMode);
+	}
 
-				element.properties.Add("size", propertyReader.val());
-				element.properties.Add("w", values.first);
-				element.properties.Add("h", values.second);
-				continue;
-			}
-			else if (k == "pos") {
-				std::pair<std::string,std::string> values;
-				propertyReader.tryReadVal(values);
-				bool isXInteger = !values.first.empty() && std::all_of(values.first.begin(), values.first.end(), ::isdigit);
-				bool isYInteger = !values.second.empty() && std::all_of(values.second.begin(), values.second.end(), ::isdigit);
-				if (isXInteger && isYInteger)
-				{
-					//for backwards compatibility
-					element.x = std::stoi(values.first);
-					element.y = std::stoi(values.second);
-				}
+	if(const auto& layoutReader = reader["layout"] )
+	{
+		for (const auto& layoutElementReader : layoutReader["elements"].children())
+		{
+			auto id = layoutElementReader["id"].readVal<std::string>();
+			LayoutElement& layoutElement = _layoutElements[id];
 
-				element.properties.Add("pos", propertyReader.val());
-				element.properties.Add("x", values.first);
-				element.properties.Add("y", values.second);
-				continue;
-			}
-			else if (k == "color") {
-				propertyReader.tryReadVal(element.color);
-				continue;
-			}
-			else if (k == "color2") {
-				propertyReader.tryReadVal(element.color2);
-				continue;
-			}
-			else if (k == "border") {
-				propertyReader.tryReadVal(element.border);
-				continue;
-			}
-			else if (k == "custom") {
-				propertyReader.tryReadVal(element.custom);
-				continue;
-			}
-			else if (k == "TFTDMode") {
-				propertyReader.tryReadVal(element.TFTDMode);
-				continue;
-			}
-			else {
-				auto v = propertyReader.val();
-				element.properties.Add(k, v);
-			}
+			layoutElement._scriptValues.load(reader, parsers.getShared());
+			layoutElement._layoutElementScripts.load(id, layoutElementReader, parsers.layoutElementScripts);
+			layoutElementReader.tryRead("class", layoutElement.className);
+			layoutElementReader.tryRead("element", layoutElement.element);
 		}
 	}
 }
@@ -195,9 +159,85 @@ int RuleInterface::getSound() const
 	return _sound;
 }
 
-const std::map <std::string, Element> &RuleInterface::getAllElements() const
+const std::map <std::string, LayoutElement> &RuleInterface::getLayoutElements() const
 {
-	return _elements;
+	return _layoutElements;
+}
+
+
+////////////////////////////////////////////////////////////
+//					Script binding
+////////////////////////////////////////////////////////////
+
+namespace
+{
+
+std::string debugDisplayScript(const LayoutElement* c)
+{
+	if (c)
+	{
+		std::string s;
+		s += LayoutElement::ScriptName;
+		s += "(name: \"";
+		// s += c->getRules()->getType();
+		s += "\")";
+		return s;
+	}
+	else
+	{
+		return "null";
+	}
+}
+
+} // namespace
+
+void LayoutElement::ScriptRegister(ScriptParserBase* parser)
+{
+	parser->registerPointerType<LayoutElement>();
+
+	Bind<LayoutElement> c = { parser };
+
+	// c.addRules<RuleCountry, &LayoutElement::getRules>("getRuleCountry");
+
+	// c.add<&LayoutElement::getPact>("getPact", "Get if the country has signed an alien pact or not.");
+
+	// c.add<&LayoutElement::getCurrentFunding>("getCurrentFunding", "Get the country's current funding.");
+	// c.add<&LayoutElement::getCurrentActivityAlien>("getCurrentActivityAlien", "Get the country's current alien activity.");
+	// c.add<&LayoutElement::getCurrentActivityXcom>("getCurrentActivityXcom", "Get the country's current xcom activity.");
+
+	c.addScriptValue<&LayoutElement::_scriptValues>();
+	c.addDebugDisplay<&debugDisplayScript>();
+
+	// c.addCustomConst("SATISFACTION_ALIENPACT", 0);
+	// c.addCustomConst("SATISFACTION_UNHAPPY", 1);
+	// c.addCustomConst("SATISFACTION_SATISIFIED", 2);
+	// c.addCustomConst("SATISFACTION_HAPPY", 3);
+}
+
+/**
+ * Constructor of new month country script parser.
+ * Called every new month for every country.
+ */
+ModScript::LayoutElementPositionParser::LayoutElementPositionParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"x", "y",
+	"element","width","height","screenWidth","screenHeight" }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+}
+
+/**
+ * Constructor of new month country script parser.
+ * Called every new month for every country.
+ */
+ModScript::LayoutElementSizeParser::LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"w", "h",
+	"element","screenWidth","screenHeight" }
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
 }
 
 }

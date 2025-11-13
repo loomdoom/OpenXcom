@@ -38,6 +38,7 @@ class Base;
 class RuleMissionScript;
 class RuleEvent;
 class AlienBase;
+class LayoutElement;
 
 /**
  * Geoscape screen which shows an overview of
@@ -48,8 +49,10 @@ class GeoscapeState : public State
 public:
 	struct UISurface
 	{
-			std::unique_ptr<Surface> surface;
+			Surface* surface; //non-owning
 			int order;
+			std::string element;
+			const LayoutElement* layoutElement; //non-owning
 	};
 private:
 	std::vector<UISurface> _uiSurfaces;

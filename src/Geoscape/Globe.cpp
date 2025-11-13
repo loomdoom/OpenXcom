@@ -2089,8 +2089,8 @@ void Globe::resize()
 	}
 	_clipper->Wxrig = width;
 	_clipper->Wybot = height;
-	_cenX = width / 2;
-	_cenY = height / 2;
+	_cenX = getX()+width / 2;
+	_cenY = getY()+height / 2;
 	setupRadii(width, height);
 	invalidate();
 }
