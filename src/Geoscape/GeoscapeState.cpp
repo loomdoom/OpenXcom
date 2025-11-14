@@ -200,29 +200,43 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
             uiSurface.order = GEOSCAPE_DRAW_ORDER::GLOBE;
 		}
 		else {
-			if(layoutElement->className.empty())
+			if(layoutElement->content.Empty())
 				continue;
 
-			if (layoutElement->className == "Text")
+			if (layoutElement->content.Has("text"))
 			{
-                 uiSurface.surface = new Text(w, h, x, y);
+				auto textButton = new TextButton(w, h, x, y);
+				textButton->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
+				textButton->setText(tr(layoutElement->content.Get("text").data()));
+				textButton->setGeoscapeButton(true);
+				uiSurface.surface = textButton;
 			}
-			else if (layoutElement->className == "InteractiveSurface")
-			{
-				uiSurface.surface = new InteractiveSurface(w, h, x, y);
-			}
-			else if (layoutElement->className == "TextButton")
-			{
-				uiSurface.surface = new TextButton(w, h, x, y);
-			}
-			else if (layoutElement->className == "Surface")
+			else if (layoutElement->content.Has("fillColor"))
 			{
 				uiSurface.surface = new Surface(w, h, x, y);
-                if(elementPair.first == "sideline")
-                {
-                    uiSurface.surface->drawRect(0, 0, w, h, 15);
-                }
+				uiSurface.surface->drawRect(0, 0, w, h,
+					std::atoi(layoutElement->content.Get("fillColor").data()));
 			}
+			// else if (layoutElement->className == "InteractiveSurface")
+			// {
+			// 	uiSurface.surface = new InteractiveSurface(w, h, x, y);
+			// }
+			// else if (layoutElement->content.Has("fillColor"))
+			// {
+			// 	uiSurface.surface = new Surface(w, h, x, y);
+            //     if(elementPair.first == "sideline")
+            //     {
+			// 		uiSurface.surface->drawRect(0, 0, w, h, layoutElement->content.Get<int>("fillColor"));
+			// 	}
+			// 	else
+			// 	{
+			// 		uiSurface.surface->fillRect(0, 0, w, h, layoutElement->content.GetInt("fillColor"));
+            //     }
+			// }
+			// if (layoutElement-> == "Text")
+			// {
+			//      uiSurface.surface = new Text(w, h, x, y);
+			// }
             uiSurface.order = GEOSCAPE_DRAW_ORDER::REST+layoutElement->order;
 		}
 
@@ -303,7 +317,7 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	// std::tie(x,y,w,h) = evaluateElement(_game,"buttonZoomOut","geoscape");
 	// _btnZoomOut = new InteractiveSurface(w, h, x, y);
 
-	int height = (screenHeight - Screen::ORIGINAL_HEIGHT) / 2 + 10;
+	// int height = (screenHeight - Screen::ORIGINAL_HEIGHT) / 2 + 10;
 	// _sideTop = new TextButton(63, height, screenWidth-63, _zoomControls->getY() - height - 1);
 	// _sideBottom = new TextButton(63, height, screenWidth-63, _zoomControls->getY() + _zoomControls->getHeight() + 1);
 
@@ -599,50 +613,50 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	_dogfightStartTimer->onTimer((StateHandler)&GeoscapeState::startDogfight);
 	_dogfightTimer->onTimer((StateHandler)&GeoscapeState::handleDogfights);
 
-	// debug helpers
-	{
-		std::vector<std::string> regionList;
-		regionList.push_back("All regions");
-		for (auto* r : *_game->getSavedGame()->getRegions())
-		{
-			regionList.push_back(r->getRules()->getType());
-		}
-		_cbxRegion->setOptions(regionList, false);
-		_cbxRegion->setVisible(false);
-		_cbxRegion->onChange((ActionHandler)&GeoscapeState::cbxRegionChange);
+	// // debug helpers
+	// {
+	// 	std::vector<std::string> regionList;
+	// 	regionList.push_back("All regions");
+	// 	for (auto* r : *_game->getSavedGame()->getRegions())
+	// 	{
+	// 		regionList.push_back(r->getRules()->getType());
+	// 	}
+	// 	_cbxRegion->setOptions(regionList, false);
+	// 	_cbxRegion->setVisible(false);
+	// 	_cbxRegion->onChange((ActionHandler)&GeoscapeState::cbxRegionChange);
 
-		std::vector<std::string> zoneList;
-		zoneList.push_back("All zones");
-		for (int z = 0; z < 20; ++z)
-		{
-			zoneList.push_back(std::to_string(z));
-		}
-		_cbxZone->setOptions(zoneList, false);
-		_cbxZone->setVisible(false);
-		_cbxZone->onChange((ActionHandler)&GeoscapeState::cbxZoneChange);
+	// 	std::vector<std::string> zoneList;
+	// 	zoneList.push_back("All zones");
+	// 	for (int z = 0; z < 20; ++z)
+	// 	{
+	// 		zoneList.push_back(std::to_string(z));
+	// 	}
+	// 	_cbxZone->setOptions(zoneList, false);
+	// 	_cbxZone->setVisible(false);
+	// 	_cbxZone->onChange((ActionHandler)&GeoscapeState::cbxZoneChange);
 
-		std::vector<std::string> areaList;
-		areaList.push_back("All areas");
-		for (int z = 0; z < 100; ++z)
-		{
-			areaList.push_back(std::to_string(z));
-		}
-		_cbxArea->setOptions(areaList, false);
-		_cbxArea->setVisible(false);
-		_cbxArea->onChange((ActionHandler)&GeoscapeState::cbxAreaChange);
+	// 	std::vector<std::string> areaList;
+	// 	areaList.push_back("All areas");
+	// 	for (int z = 0; z < 100; ++z)
+	// 	{
+	// 		areaList.push_back(std::to_string(z));
+	// 	}
+	// 	_cbxArea->setOptions(areaList, false);
+	// 	_cbxArea->setVisible(false);
+	// 	_cbxArea->onChange((ActionHandler)&GeoscapeState::cbxAreaChange);
 
-		std::vector<std::string> countryList;
-		countryList.push_back("All countries");
-		for (auto* c : *_game->getSavedGame()->getCountries())
-		{
-			countryList.push_back(tr(c->getRules()->getType()));
-		}
-		_cbxCountry->setOptions(countryList, false);
-		_cbxCountry->setVisible(false);
-		_cbxCountry->onChange((ActionHandler)&GeoscapeState::cbxCountryChange);
-	}
+	// 	std::vector<std::string> countryList;
+	// 	countryList.push_back("All countries");
+	// 	for (auto* c : *_game->getSavedGame()->getCountries())
+	// 	{
+	// 		countryList.push_back(tr(c->getRules()->getType()));
+	// 	}
+	// 	_cbxCountry->setOptions(countryList, false);
+	// 	_cbxCountry->setVisible(false);
+	// 	_cbxCountry->onChange((ActionHandler)&GeoscapeState::cbxCountryChange);
+	// }
 
-	timeDisplay();
+	// timeDisplay();
 }
 
 /**
@@ -963,42 +977,42 @@ void GeoscapeState::think()
  */
 void GeoscapeState::timeDisplay()
 {
-	if (Options::showFundsOnGeoscape)
-	{
-		if (Options::oxceGeoShowScoreInsteadOfFunds)
-		{
-			// it's a cheat (you're not supposed to see this info in real time), for debugging only
-			_txtFunds->setText(std::to_string(_game->getSavedGame()->getCurrentScore(_game->getSavedGame()->getMonthsPassed() + 1)));
-		}
-		else
-		{
-			_txtFunds->setText(Unicode::formatFunding(_game->getSavedGame()->getFunds()));
-		}
-	}
+	// if (Options::showFundsOnGeoscape)
+	// {
+	// 	if (Options::oxceGeoShowScoreInsteadOfFunds)
+	// 	{
+	// 		// it's a cheat (you're not supposed to see this info in real time), for debugging only
+	// 		_txtFunds->setText(std::to_string(_game->getSavedGame()->getCurrentScore(_game->getSavedGame()->getMonthsPassed() + 1)));
+	// 	}
+	// 	else
+	// 	{
+	// 		_txtFunds->setText(Unicode::formatFunding(_game->getSavedGame()->getFunds()));
+	// 	}
+	// }
 
-	std::ostringstream ss;
-	ss << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getSecond();
-	_txtSec->setText(ss.str());
+	// std::ostringstream ss;
+	// ss << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getSecond();
+	// _txtSec->setText(ss.str());
 
-	std::ostringstream ss2;
-	ss2 << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getMinute();
-	_txtMin->setText(ss2.str());
+	// std::ostringstream ss2;
+	// ss2 << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getMinute();
+	// _txtMin->setText(ss2.str());
 
-	std::ostringstream ss3;
-	ss3 << _game->getSavedGame()->getTime()->getHour();
-	_txtHour->setText(ss3.str());
+	// std::ostringstream ss3;
+	// ss3 << _game->getSavedGame()->getTime()->getHour();
+	// _txtHour->setText(ss3.str());
 
-	std::ostringstream ss4;
-	ss4 << _game->getSavedGame()->getTime()->getDayString(_game->getLanguage());
-	_txtDay->setText(ss4.str());
+	// std::ostringstream ss4;
+	// ss4 << _game->getSavedGame()->getTime()->getDayString(_game->getLanguage());
+	// _txtDay->setText(ss4.str());
 
-	_txtWeekday->setText(tr(_game->getSavedGame()->getTime()->getWeekdayString()));
+	// _txtWeekday->setText(tr(_game->getSavedGame()->getTime()->getWeekdayString()));
 
-	_txtMonth->setText(tr(_game->getSavedGame()->getTime()->getMonthString()));
+	// _txtMonth->setText(tr(_game->getSavedGame()->getTime()->getMonthString()));
 
-	std::ostringstream ss5;
-	ss5 << _game->getSavedGame()->getTime()->getYear();
-	_txtYear->setText(ss5.str());
+	// std::ostringstream ss5;
+	// ss5 << _game->getSavedGame()->getTime()->getYear();
+	// _txtYear->setText(ss5.str());
 }
 
 /**
@@ -4931,32 +4945,60 @@ void GeoscapeState::resize(int &dX, int &dY)
 	Options::baseXResolution = std::max(Screen::ORIGINAL_WIDTH, Options::displayWidth / divisor);
 	Options::baseYResolution = std::max(Screen::ORIGINAL_HEIGHT, (int)(Options::displayHeight / pixelRatioY / divisor));
 
-	dX = Options::baseXResolution - dX;
-	dY = Options::baseYResolution - dY;
+	// dX = Options::baseXResolution - dX;
+	// dY = Options::baseYResolution - dY;
+	int screenWidth = Options::baseXResolution;
+	int screenHeight = Options::baseYResolution;
 
+    for(const auto& uiSurface : _uiSurfaces)
+    {
+        //RECACLUATE POSITIONS
+		int w,h,x,y;
+
+		ModScript::LayoutElementSize::Output args{ w, h };
+		ModScript::LayoutElementSize::Worker work{ uiSurface.layoutElement ,screenWidth,screenHeight};
+		work.execute(uiSurface.layoutElement->getScript<ModScript::LayoutElementSize>(), args);
+		w = std::get<0>(args.data);
+		h = std::get<1>(args.data);
+
+		ModScript::LayoutElementPosition::Output argsPos{ x, y };
+		ModScript::LayoutElementPosition::Worker workPos{ uiSurface.layoutElement ,w,h,screenWidth,screenHeight};
+		workPos.execute(uiSurface.layoutElement->getScript<ModScript::LayoutElementPosition>(), argsPos);
+
+		x = std::get<0>(argsPos.data);
+		y = std::get<1>(argsPos.data);
+
+        uiSurface.surface->setX(x);
+        uiSurface.surface->setY(y);
+        uiSurface.surface->setWidth(w);
+        uiSurface.surface->setHeight(h);
+    }
+
+    //readjust globe internals to current sizes (updated in prev loop)
 	_globe->resize();
 
-	for (auto* surface : _surfaces)
-	{
-		if (surface != _globe)
-		{
-			surface->setX(surface->getX() + dX);
-			surface->setY(surface->getY() + dY/2);
-		}
-	}
 
-	_bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
-	_bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
+	// for (auto* surface : _surfaces)
+	// {
+	// 	if (surface != _globe)
+	// 	{
+	// 		surface->setX(surface->getX() + dX);
+	// 		surface->setY(surface->getY() + dY/2);
+	// 	}
+	// }
 
-	int height = (Options::baseYResolution - Screen::ORIGINAL_HEIGHT) / 2 + 10;
-	_sideTop->setHeight(height);
-	_sideTop->setY(_zoomControls->getY() - height - 1);
-	_sideBottom->setHeight(height);
-	_sideBottom->setY(_zoomControls->getY() + _zoomControls->getHeight() + 1);
+	// _bg->setX((_globe->getWidth() - _bg->getWidth()) / 2);
+	// _bg->setY((_globe->getHeight() - _bg->getHeight()) / 2);
 
-	_sideLine->setHeight(Options::baseYResolution);
-	_sideLine->setY(0);
-	_sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
+	// int height = (Options::baseYResolution - Screen::ORIGINAL_HEIGHT) / 2 + 10;
+	// _sideTop->setHeight(height);
+	// _sideTop->setY(_zoomControls->getY() - height - 1);
+	// _sideBottom->setHeight(height);
+	// _sideBottom->setY(_zoomControls->getY() + _zoomControls->getHeight() + 1);
+
+	// _sideLine->setHeight(Options::baseYResolution);
+	// _sideLine->setY(0);
+	// _sideLine->drawRect(0, 0, _sideLine->getWidth(), _sideLine->getHeight(), 15);
 }
 bool GeoscapeState::buttonsDisabled()
 {
@@ -4994,14 +5036,14 @@ void GeoscapeState::updateSlackingIndicator()
 		scientistsSlacking += xcomBase->getAvailableScientists();
 		engineersSlacking += xcomBase->getAvailableEngineers();
 	}
-	if (scientistsSlacking > 0 || engineersSlacking > 0)
-	{
-		_txtSlacking->setText(tr("STR_SLACKING_INDICATOR").arg(scientistsSlacking).arg(engineersSlacking));
-	}
-	else
-	{
-		_txtSlacking->setText("");
-	}
+	// if (scientistsSlacking > 0 || engineersSlacking > 0)
+	// {
+	// 	_txtSlacking->setText(tr("STR_SLACKING_INDICATOR").arg(scientistsSlacking).arg(engineersSlacking));
+	// }
+	// else
+	// {
+	// 	_txtSlacking->setText("");
+	// }
 }
 
 void GeoscapeState::cbxRegionChange(Action *)

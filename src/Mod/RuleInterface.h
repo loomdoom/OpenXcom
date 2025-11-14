@@ -28,10 +28,59 @@ namespace OpenXcom
 class Mod;
 class SavedGame;
 
+struct LayoutElementProperties
+{
+	private:
+	std::unique_ptr<std::map<std::string, std::string,std::less<void>>> prps = {};
+
+	public:
+			void Add(std::string_view key, std::string_view value)
+			{
+					if (!prps)
+					{
+							prps.reset(new std::map<std::string, std::string,std::less<void>>());
+					}
+					prps->emplace(key, value);
+			}
+
+			const std::string_view Get(std::string_view key, std::string_view defaultValue = "") const
+			{
+					if (!prps)
+					{
+							return defaultValue;
+					}
+					auto it = prps->find(key);
+					return it != prps->end() ? std::string_view(it->second) : defaultValue;
+			}
+
+			template<typename T>
+			const T Get(std::string_view key, const T& defaultValue = T()) const
+			{
+				return
+			}
+
+			const bool Has(std::string_view key) const
+			{
+					if (!prps)
+					{
+							return false;
+					}
+					auto it = prps->find(key);
+					return it != prps->end();
+			}
+
+			bool Empty() const
+			{
+				return !prps || prps->empty();
+			}
+};
+
 struct LayoutElement
 {
-	std::string className;
 	std::string element;
+
+	LayoutElementProperties content;
+
 	int order = INT_MAX;
 
 	ModScript::LayoutElementScripts::Container _layoutElementScripts;

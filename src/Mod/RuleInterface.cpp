@@ -88,7 +88,16 @@ void RuleInterface::load(const YAML::YamlNodeReader& reader, Mod *mod, const Mod
 
 			layoutElement._scriptValues.load(reader, parsers.getShared());
 			layoutElement._layoutElementScripts.load(id, layoutElementReader, parsers.layoutElementScripts);
-			layoutElementReader.tryRead("class", layoutElement.className);
+
+			if(layoutElementReader["content"])
+			{
+				for (const auto& contentReader : layoutElementReader["content"].children())
+				{
+					auto k = contentReader.key();
+					auto v = contentReader.val();
+					layoutElement.content.Add(k, v);
+				}
+			}
 			layoutElementReader.tryRead("element", layoutElement.element);
 			layoutElementReader.tryRead("order", layoutElement.order);
 		}
