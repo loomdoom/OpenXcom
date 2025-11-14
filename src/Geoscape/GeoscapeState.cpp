@@ -203,11 +203,12 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 			if(layoutElement->content.Empty())
 				continue;
 
-			if (layoutElement->content.Has("text"))
+			if (layoutElement->content.Has("text")) // and onclick
 			{
 				auto textButton = new TextButton(w, h, x, y);
 				textButton->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
 				textButton->setText(tr(layoutElement->content.Get("text").data()));
+				textButton->setBig();
 				textButton->setGeoscapeButton(true);
 				uiSurface.surface = textButton;
 			}
@@ -216,6 +217,10 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 				uiSurface.surface = new Surface(w, h, x, y);
 				uiSurface.surface->drawRect(0, 0, w, h,
 					std::atoi(layoutElement->content.Get("fillColor").data()));
+			}
+			else
+			{
+
 			}
 			// else if (layoutElement->className == "InteractiveSurface")
 			// {

@@ -2652,31 +2652,102 @@ interfaces:
               return x y;
             sizeScript: |
               return 63 11;
-  #     - id: buttonBases
-  #       pos: ["screenWidth-63","screenHeight/2-88"]
-  #       size: [63,11]
-  #       order: 5
-  #       class: TextButton
-  #     - id: buttonGraphs
-  #       pos: ["screenWidth-63","screenHeight/2-76"]
-  #       size: [63,11]
-  #       order: 6
-  #       class: TextButton
-  #     - id: buttonUfopaedia
-  #       pos: ["screenWidth-63","screenHeight/2-64"]
-  #       size: [63,11]
-  #       order: 7
-  #       class: TextButton
-  #     - id: buttonOptions
-  #       pos: ["screenWidth-63","screenHeight/2-52"]
-  #       size: [63,11]
-  #       order: 8
-  #       class: TextButton
-  #     - id: buttonFunding
-  #       pos: ["screenWidth-63","screenHeight/2-40"]
-  #       size: [63,11]
-  #       order: 9
-  #       class: TextButton
+        - id: button5Secs
+          order: 11
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_5_SECONDS"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 63;
+              set y screenHeight;
+              div y 2;
+              add y 12;
+              return x y;
+            sizeScript: |
+              return 31 13;
+        - id: button1Min
+          order: 12
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_1_MINUTE"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 31;
+              set y screenHeight;
+              div y 2;
+              add y 12;
+              return x y;
+            sizeScript: |
+              return 31 13;
+        - id: button5Mins
+          order: 13
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_5_MINUTES"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 63;
+              set y screenHeight;
+              div y 2;
+              add y 26;
+              return x y;
+            sizeScript: |
+              return 31 13;
+        - id: button30Mins
+          order: 14
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_30_MINUTES"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 31;
+              set y screenHeight;
+              div y 2;
+              add y 26;
+              return x y;
+            sizeScript: |
+              return 31 13;
+        - id: button1Hour
+          order: 15
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_1_HOUR"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 63;
+              set y screenHeight;
+              div y 2;
+              add y 40;
+              return x y;
+            sizeScript: |
+              return 31 13;
+        - id: button1Day
+          order: 16
+          element: button
+          #group: timeControls
+          content:
+            text: "STR_1_DAY"
+          scripts:
+            positionScript: |
+              set x screenWidth;
+              sub x 31;
+              set y screenHeight;
+              div y 2;
+              add y 40;
+              return x y;
+            sizeScript: |
+              return 31 13;
   #     - id: button5Secs
   #       pos: ["screenWidth-63","screenHeight/2+12"]
   #       size: [31,13]
@@ -2707,6 +2778,8 @@ interfaces:
   #       size: [31,13]
   #       order: 16
   #       class: TextButton
+
+
   #     - id: buttonRotateLeft
   #       pos: ["screenWidth-61","screenHeight/2+76"]
   #       size: [12,10]
