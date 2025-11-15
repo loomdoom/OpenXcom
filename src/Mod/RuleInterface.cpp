@@ -237,10 +237,6 @@ ModScript::LayoutElementPositionParser::LayoutElementPositionParser(ScriptGlobal
 	b.addCustomPtr<const Mod>("rules", mod);
 }
 
-/**
- * Constructor of new month country script parser.
- * Called every new month for every country.
- */
 ModScript::LayoutElementSizeParser::LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
 	"w", "h",
 	"element","screenWidth","screenHeight" }
@@ -250,4 +246,21 @@ ModScript::LayoutElementSizeParser::LayoutElementSizeParser(ScriptGlobal* shared
 	b.addCustomPtr<const Mod>("rules", mod);
 }
 
+ModScript::GeoscapeTimerScriptParser::GeoscapeTimerScriptParser(ScriptGlobal* shared, const std::string& name, Mod* mod) : ScriptParserEvents{ shared, name,
+	"timePart"}
+{
+	BindBase b { this };
+
+	b.addCustomPtr<const Mod>("rules", mod);
+	b.addCustomConst("YEAR", 0);
+	b.addCustomConst("MONTH", 1);
+	b.addCustomConst("DAY", 2);
+	b.addCustomConst("HOURS", 3);
+	b.addCustomConst("MINUTES", 4);
+	b.addCustomConst("SECONDS", 5);
+	b.addCustomConst("WEEKDAY", 6);
+
+
 }
+
+} // namespace OpenXcom

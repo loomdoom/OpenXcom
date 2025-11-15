@@ -203,25 +203,62 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 			if(layoutElement->content.Empty())
 				continue;
 
-			if (layoutElement->content.Has("text")) // and onclick
+			if (layoutElement->content.Has("textButton")) // and onclick
 			{
 				auto textButton = new TextButton(w, h, x, y);
-				textButton->initText(_game->getMod()->getFont("FONT_GEO_BIG"), _game->getMod()->getFont("FONT_GEO_SMALL"), _game->getLanguage());
-				textButton->setText(tr(layoutElement->content.Get("text").data()));
-				textButton->setBig();
+				auto smallFont = _game->getMod()->getFont(layoutElement->content.Get("fontSmall","FONT_GEO_SMALL").data());
+				auto bigFont = _game->getMod()->getFont(layoutElement->content.Get("fontBig","FONT_GEO_BIG").data());
+				textButton->initText(bigFont, smallFont, _game->getLanguage());
+				textButton->setText(tr(layoutElement->content.Get("textButton").data()));
+
+				if(layoutElement->content.Get("textSize") == "small")
+				{
+					textButton->setSmall();
+				}
+				else
+				{
+					textButton->setBig();
+				}
+
+				// textButton->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
 				textButton->setGeoscapeButton(true);
 				uiSurface.surface = textButton;
 			}
-			else if (layoutElement->content.Has("fillColor"))
+			else if (layoutElement->content.Has("primitive"))
 			{
 				uiSurface.surface = new Surface(w, h, x, y);
-				uiSurface.surface->drawRect(0, 0, w, h,
-					std::atoi(layoutElement->content.Get("fillColor").data()));
+				auto color = std::atoi(layoutElement->content.Get("color", "0").data());
+				if(layoutElement->content.Get("primitive") == "rect") {
+					uiSurface.surface->drawRect(0, 0, w, h,color);
+				}
+				else {
+					continue;
+				}
 			}
 			else
 			{
-
+				continue;
 			}
+
+			//apply colors and border
+			if(layoutElement->content.Has("color"))
+			{
+				auto color = std::atoi(layoutElement->content.Get("color", "0").data());
+				uiSurface.surface->setColor(color);
+			}
+
+			if(layoutElement->content.Has("color2"))
+			{
+				auto color = std::atoi(layoutElement->content.Get("color2", "0").data());
+				uiSurface.surface->setSecondaryColor(color);
+			}
+
+			if(layoutElement->content.Has("color2"))
+			{
+				auto color = std::atoi(layoutElement->content.Get("border", "0").data());
+				uiSurface.surface->setBorderColor(color);
+			}
+
 			// else if (layoutElement->className == "InteractiveSurface")
 			// {
 			// 	uiSurface.surface = new InteractiveSurface(w, h, x, y);
@@ -389,11 +426,11 @@ GeoscapeState::GeoscapeState() : _pause(false), _zoomInEffectDone(false), _zoomO
 	{
 		if(uiSurface.element.empty())
 		{
-			add(uiSurface.surface);
+			add(uiSurface.surface,true);
 		}
 		else
 		{
-			add(uiSurface.surface,uiSurface.element,"geoscape");
+			add(uiSurface.surface,uiSurface.element,"geoscape",nullptr,true);
 		}
 	}
 
@@ -995,29 +1032,45 @@ void GeoscapeState::timeDisplay()
 	// 	}
 	// }
 
-	// std::ostringstream ss;
-	// ss << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getSecond();
-	// _txtSec->setText(ss.str());
 
-	// std::ostringstream ss2;
-	// ss2 << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getMinute();
-	// _txtMin->setText(ss2.str());
+	std::ostringstream seconds;
+	seconds << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getSecond();
+	// _txtSec->setText(seconds.str());
 
-	// std::ostringstream ss3;
-	// ss3 << _game->getSavedGame()->getTime()->getHour();
-	// _txtHour->setText(ss3.str());
+	std::ostringstream minutes;
+	minutes << std::setfill('0') << std::setw(2) << _game->getSavedGame()->getTime()->getMinute();
+	// _txtMin->setText(minutes.str());
 
-	// std::ostringstream ss4;
-	// ss4 << _game->getSavedGame()->getTime()->getDayString(_game->getLanguage());
-	// _txtDay->setText(ss4.str());
+	std::ostringstream hours;
+	hours << _game->getSavedGame()->getTime()->getHour();
+	// _txtHour->setText(hours.str());
 
+	std::ostringstream days;
+	days << _game->getSavedGame()->getTime()->getDayString(_game->getLanguage());
+	// _txtDay->setText(days.str());
+
+	auto weekday = tr(_game->getSavedGame()->getTime()->getWeekdayString());
 	// _txtWeekday->setText(tr(_game->getSavedGame()->getTime()->getWeekdayString()));
 
-	// _txtMonth->setText(tr(_game->getSavedGame()->getTime()->getMonthString()));
+	auto month = tr(_game->getSavedGame()->getTime()->getMonthString());
+	// _txtMonth->setText(tr(month);
 
-	// std::ostringstream ss5;
-	// ss5 << _game->getSavedGame()->getTime()->getYear();
-	// _txtYear->setText(ss5.str());
+	std::ostringstream year;
+	year << _game->getSavedGame()->getTime()->getYear();
+	// _txtYear->setText(year.str());
+
+	for(const auto& uiSurface : _uiSurfaces)
+	{
+		int result;
+		ModScript::GeoscapeTimerDisplay::Output args{ result };
+		const auto &timeScript = uiSurface.layoutElement->getScript<ModScript::GeoscapeTimerDisplay>();
+		if(timeScript)
+		{
+			ModScript::GeoscapeTimerDisplay::Worker work{};
+			work.execute(timeScript, args);
+		}
+	}
+
 }
 
 /**

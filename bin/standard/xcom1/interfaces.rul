@@ -2536,7 +2536,8 @@ interfaces:
         - id: sideline
           order: 1
           content:
-            fillColor: 15
+            primitive: rect
+            color: 15
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2549,9 +2550,13 @@ interfaces:
               return w h;
         - id: buttonIntercept
           order: 4
-          element: button
           content:
-            text: "STR_INTERCEPT"
+            textButton: "STR_INTERCEPT"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2564,9 +2569,13 @@ interfaces:
               return 63 11;
         - id: buttonBases
           order: 5
-          element: button
           content:
-            text: "STR_BASES"
+            textButton: "STR_BAES"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2579,9 +2588,13 @@ interfaces:
               return 63 11;
         - id: buttonGraphs
           order: 6
-          element: button
           content:
-            text: "STR_GRAPHS"
+            textButton: "STR_GRAPHS"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2594,9 +2607,13 @@ interfaces:
               return 63 11;
         - id: buttonUfopedia
           order: 7
-          element: button
           content:
-            text: "STR_UFOPAEDIA_UC"
+            textButton: "STR_UFOPAEDIA_UC"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2609,9 +2626,13 @@ interfaces:
               return 63 11;
         - id: buttonOptions
           order: 8
-          element: button
           content:
-            text: "STR_OPTIONS_UC"
+            textButton: "STR_OPTIONS_UC"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2624,9 +2645,13 @@ interfaces:
               return 63 11;
         - id: buttonFunding
           order: 9
-          element: button
           content:
-            text: "STR_FUNDING_UC"
+            textButton: "STR_FUNDING_UC"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2639,9 +2664,13 @@ interfaces:
               return 63 11;
         - id: buttonExtended
           order: 9
-          element: button
           content:
-            text: "STR_EXTENDED_UC"
+            textButton: "STR_EXTENDED_UC"
+            textSize: small
+            fontSmall: FONT_GEO_SMALL
+            fontBig: FONT_GEO_BIG
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2654,10 +2683,11 @@ interfaces:
               return 63 11;
         - id: button5Secs
           order: 11
-          element: button
           #group: timeControls
           content:
             text: "STR_5_SECONDS"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2670,10 +2700,11 @@ interfaces:
               return 31 13;
         - id: button1Min
           order: 12
-          element: button
           #group: timeControls
           content:
             text: "STR_1_MINUTE"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2686,10 +2717,11 @@ interfaces:
               return 31 13;
         - id: button5Mins
           order: 13
-          element: button
           #group: timeControls
           content:
             text: "STR_5_MINUTES"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2702,10 +2734,11 @@ interfaces:
               return 31 13;
         - id: button30Mins
           order: 14
-          element: button
           #group: timeControls
           content:
             text: "STR_30_MINUTES"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2718,10 +2751,11 @@ interfaces:
               return 31 13;
         - id: button1Hour
           order: 15
-          element: button
           #group: timeControls
           content:
             text: "STR_1_HOUR"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;
@@ -2734,10 +2768,11 @@ interfaces:
               return 31 13;
         - id: button1Day
           order: 16
-          element: button
           #group: timeControls
           content:
             text: "STR_1_DAY"
+            color: 246
+            color2: 245
           scripts:
             positionScript: |
               set x screenWidth;

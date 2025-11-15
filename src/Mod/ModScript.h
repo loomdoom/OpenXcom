@@ -103,16 +103,14 @@ class ModScript
 		LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
 	};
 
+	////////////////////////////////////////////////////////////
+	//					geoscape scripts
+	////////////////////////////////////////////////////////////
 
-	// struct LayoutElementPositionParser : ScriptParserEvents<ScriptOutputArgs<int&,int&>, const LayoutElement*,int,int,int,int>
-	// {
-	// 	LayoutElementPositionParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
-	// };
-
-	// struct LayoutElementSizeParser : ScriptParserEvents<ScriptOutputArgs<int&,int&>, const LayoutElement*>
-	// {
-	// 	LayoutElementSizeParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
-	// };
+	struct GeoscapeTimerScriptParser : ScriptParserEvents<ScriptOutputArgs<int&>>
+	{
+		GeoscapeTimerScriptParser(ScriptGlobal* shared, const std::string& name, Mod* mod);
+	};
 
 	////////////////////////////////////////////////////////////
 	//					unit script
@@ -361,6 +359,12 @@ public:
 	using LayoutElementSize = MACRO_NAMED_SCRIPT("sizeScript", LayoutElementSizeParser);
 
 	////////////////////////////////////////////////////////////
+	//					geoscape scripts
+	////////////////////////////////////////////////////////////
+	using GeoscapeTimerDisplay = MACRO_NAMED_SCRIPT("geoscapeTimerDisplay", GeoscapeTimerScriptParser);
+
+
+	////////////////////////////////////////////////////////////
 	//					unit script
 	////////////////////////////////////////////////////////////
 
@@ -482,7 +486,8 @@ public:
 
 	using LayoutElementScripts = ScriptGroup<Mod,
 		LayoutElementPosition,
-		LayoutElementSize
+		LayoutElementSize,
+		GeoscapeTimerDisplay
 	>;
 
 	using BattleUnitScripts = ScriptGroup<Mod,

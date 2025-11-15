@@ -72,9 +72,9 @@ public:
 	/// Set window background by image name (instead of by interface name).
 	void setWindowBackgroundImage(Window* window, const std::string& bgImageName);
 	/// Adds a child element to the state.
-	void add(Surface *surface);
+	void add(Surface *surface,bool skipTextInit = false);
 	/// Adds a child element to the state.
-	void add(Surface *surface, const std::string &id, const std::string &category, Surface *parent = 0);
+	void add(Surface *surface, const std::string &id, const std::string &category, Surface *parent = 0,bool skipTextInit = false);
 	/// Gets whether the state is a full-screen.
 	bool isScreen() const;
 	/// Toggles whether the state is a full-screen.

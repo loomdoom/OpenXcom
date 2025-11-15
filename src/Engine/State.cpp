@@ -151,13 +151,13 @@ void State::setWindowBackgroundImage(Window* window, const std::string& bgImageN
  * they have to be added in ascending Z-Order to be blitted
  * correctly onto the screen.
  */
-void State::add(Surface *surface)
+void State::add(Surface *surface,bool skipTextInit)
 {
 	// Set palette
 	surface->setPalette(_palette);
 
 	// Set default text resources
-	if (_game->getLanguage() && _game->getMod())
+	if (!skipTextInit && _game->getLanguage() && _game->getMod())
 		surface->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 
 	_surfaces.push_back(surface);
@@ -173,7 +173,7 @@ void State::add(Surface *surface)
  * @param parent the surface to base the coordinates of this element off.
  * @note if no parent is defined the element will not be moved.
  */
-void State::add(Surface *surface, const std::string &id, const std::string &category, Surface *parent)
+void State::add(Surface *surface, const std::string &id, const std::string &category, Surface *parent,bool skipTextInit)
 {
 	// Set palette
 	surface->setPalette(_palette);
@@ -227,7 +227,7 @@ void State::add(Surface *surface, const std::string &id, const std::string &cate
 	}
 
 	// Set default text resources
-	if (_game->getLanguage() && _game->getMod())
+	if (!skipTextInit && _game->getLanguage() && _game->getMod())
 		surface->initText(_game->getMod()->getFont("FONT_BIG"), _game->getMod()->getFont("FONT_SMALL"), _game->getLanguage());
 
 	_surfaces.push_back(surface);
