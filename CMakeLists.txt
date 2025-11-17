@@ -81,6 +81,13 @@ else ()
   message ( STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}" )
 endif ()
 
+if(MSVC)
+  add_compile_options(/wd4244 /wd4267 /wd4267 /wd4996 /wd4267 /wd4005) # MSVC warnings to ignore
+  add_compile_options(/bigobj) # MSVC linker stuff
+  add_definitions(-DC4_MSVC) # Define C4_MSVC for MSVC builds
+endif()
+
+
 # Include rapidyaml lib
 include_directories(${CMAKE_SOURCE_DIR}/libs/rapidyaml)
 
