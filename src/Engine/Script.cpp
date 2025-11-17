@@ -37,6 +37,9 @@
 #include "../fallthrough.h"
 #include "Collections.h"
 
+#include <lua.hpp>
+#include <sol/sol.hpp>
+
 namespace OpenXcom
 {
 
@@ -3654,13 +3657,221 @@ const ScriptRefData* ScriptParserBase::getRef(ScriptRange<ScriptRef> name) const
 	return findSortHelper(_refList, name);
 }
 
+namespace {
+	void rewriteToLua(std::string& os, const ScriptRefOperation& op, const SelectedToken* args)
+	{
+		std::string procname;
+		op.procName.interate([&](auto &&scriptref) { procname += scriptref.toString(); });
+		if(procname == "return")
+		{
+			os.append(procname);
+			for(int i=0;i<ScriptMaxArg;++i)
+			{
+				if(args[i].getType() != TokenNone)
+				{
+					if(i>0)
+						os.append(", ");
+					else
+						os.append(" ");
+					os.append(args[i].toString());
+				}
+			}
+		}
+		else if(procname == "var")
+		{
+
+			os.append("local ");
+			os.append(args[1].toString());
+			if(args[2].getType() != TokenNone)
+			{
+				os.append(" = ");
+				os.append(args[1].toString());
+			}
+		}
+		else if(procname == "mul")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[0].toString());
+			os.append(" * ");
+			os.append(args[1].toString());
+		}
+		else if(procname == "muldiv")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[0].toString());
+			os.append(" * ");
+			os.append(args[1].toString());
+			os.append(" / ");
+			os.append(args[2].toString());
+		}
+		else if(procname == "div")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[0].toString());
+			os.append(" / ");
+			os.append(args[1].toString());
+		}
+		else if(procname == "sub")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[0].toString());
+			os.append(" - ");
+			os.append(args[1].toString());
+		}
+		else if(procname == "add")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[0].toString());
+			os.append(" + ");
+			os.append(args[1].toString());
+		}
+		else if(procname == "set")
+		{
+			os.append(args[0].toString());
+			os.append(" = ");
+			os.append(args[1].toString());
+		}
+		else if(procname == "end")
+		{
+			os.append("end");
+		}
+		else if(procname == "if"  || procname == "else")
+		{
+			if( procname == "else")
+			{
+				if(args[0].getType() ==  TokenNone)
+				{
+					os.append("else then");
+					return;
+				}
+				else
+				{
+					os.append("elseif ");
+				}
+			} else {
+				os.append("if ");
+			}
+
+			os.append(args[1].toString());
+
+			if("ge")
+			{
+				os.append(" >= ");
+			}
+			else if("le")
+			{
+				os.append(" <= ");
+			}
+			else if("gt")
+			{
+				os.append(" > ");
+			}
+			else if("lt")
+			{
+				os.append(" < ");
+			}
+			else if("eq")
+			{
+				os.append(" == ");
+			}
+			else if("ne")
+			{
+				os.append(" ~= ");
+			}
+			os.append(args[2].toString());
+			os.append(" then\n");
+		}
+		else { //TEMPSHIT
+			std::stringstream op;
+
+			for(int i=0;i<ScriptMaxArg;++i) {
+				if(args[i].getType() != TokenNone)
+				{
+					if(i>0)
+						op << ", ";
+					else
+						op << " ";
+
+					op << args[i].toString();
+				}
+			}
+			os.append(procname);
+			os.append("(");
+			os.append(op.str());
+			os.append(")"); // usertype.func(instance,arg1,arg2) syntax
+			// Log(LOG_INFO) << "usertype function " << procname << "(" << op.str() << ")" << std::endl;
+		}
+		// else {
+		// 	std::stringstream temp;
+
+		// 	for(int i=0;i<ScriptMaxArg;++i) {
+		// 		if(args[i].getType() != TokenNone)
+		// 		{
+		// 			if(i>0)
+		// 				temp << ", ";
+		// 			else
+		// 				temp << " (";
+
+		// 			temp << args[i].toString();
+		// 		}
+		// 	}
+
+		// 	Log(LOG_ERROR) << "unhandled function " << procname << temp.str();
+		// }
+		// //os << "-- " << op..toString() << " ";
+		// for (size_t i = 0; i < ScriptMaxArg; ++i)
+		// {
+		// 	if (args[i].getType() != TokenNone)
+		// 	{
+		// 		os << args[i].toString();
+		// 		if (i + 1 < ScriptMaxArg && args[i + 1].getType() != TokenNone)
+		// 		{
+		// 			os << ", ";
+		// 		}
+		// 	}
+		// }
+		// os << "\n";
+		os.append("\n");
+	}
+
+	void compile_script_to_bytecode(const std::string& code, std::vector<char>& out_bytecode) {
+    sol::state loader;
+	// Log(LOG_ERROR) << "precompiling " << code << std::endl;
+    loader.open_libraries(sol::lib::base);
+
+    // Load Lua chunk (compiles but does not run)
+    int result = luaL_loadbuffer(loader.lua_state(), code.data(), code.size(), "script_from_string");
+    if (result != LUA_OK) {
+        throw std::runtime_error(lua_tostring(loader.lua_state(), -1));
+    }
+
+    // Writer callback
+    auto writer = [](lua_State*, const void* p, size_t sz, void* ud) {
+        auto* buffer = static_cast<std::vector<char>*>(ud);
+        const char* c = static_cast<const char*>(p);
+        buffer->insert(buffer->end(), c, c + sz);
+        return 0;
+    };
+
+    if (lua_dump(loader.lua_state(), writer, &out_bytecode, 1) != 0) {
+        throw std::runtime_error("Failed to dump bytecode");
+    }
+
+	}
+}
+
 /**
  * Parse string and write script to ScriptBase
  * @param src struct where final script is write to
  * @param src_code string with script
  * @return true if string have valid script
  */
-bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::string& parentName, const std::string& srcCode) const
+bool ScriptParserBase::parseBase(ScriptContainerBase& destScript,LuaScriptByteCode& dstLuaScript, const std::string& parentName, const std::string& srcCode) const
 {
 	ScriptContainerBase tempScript;
 	std::string err = "Error in parsing script '" + _name + "' for '" + parentName + "': ";
@@ -3672,11 +3883,24 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 
 	bool haveLastReturn = false;
 	bool haveCodeNormal = false;
+
+	if(srcCode.find("#pragma lua") != std::string::npos)
+	{
+		//lua script detected, skip parsing
+		Log(LOG_ERROR) << err << "lua scripts are not supported in this parser";
+		return false;
+	}
+
 	ScriptRefTokens range = ScriptRefTokens{ srcCode.data(), srcCode.data() + srcCode.size() };
 	if (!range)
 	{
 		return false;
 	}
+
+	// Log(LOG_ERROR) << "srcCode: \n" << srcCode << "\n---\n";
+
+	std::string luastream;
+	luastream.reserve(srcCode.size() * 2);
 
 	while (true)
 	{
@@ -3702,7 +3926,9 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 				return false;
 			}
 			help.relese();
+			compile_script_to_bytecode(luastream, tempScript.luadata());
 			destScript = std::move(tempScript);
+			// Log(LOG_INFO) << "\ny-script:\n"<<srcCode<<"\n---\n rewriten to lua:\n" << luastream << "-----" << std::endl;
 			return true;
 		}
 
@@ -3736,6 +3962,8 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 		for (size_t i = (op_curr.haveArg() ? 2 : 1); i < ScriptMaxArg; ++i)
 			args[i] = range.getNextToken();
 		SelectedToken f = range.getNextToken(TokenSemicolon);
+
+		rewriteToLua(luastream,op_curr,args);
 
 		//validation
 		bool valid = true;
@@ -3833,13 +4061,13 @@ bool ScriptParserBase::parseBase(ScriptContainerBase& destScript, const std::str
 /**
  * Parse node and return new script.
  */
-void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::YamlNodeReader& reader) const
+void ScriptParserBase::parseNode(ScriptContainerBase& container, LuaScriptByteCode &luabytecode, const std::string& parentName, const YAML::YamlNodeReader& reader) const
 {
 	if(const YAML::YamlNodeReader& scripts = reader["scripts"])
 	{
 		if (const YAML::YamlNodeReader& curr = scripts[ryml::to_csubstr(getName())])
 		{
-			if (false == parseBase(container, parentName, curr.readVal<std::string>()))
+			if (false == parseBase(container, luabytecode, parentName, curr.readVal<std::string>()))
 			{
 				Log(LOG_ERROR) << "    for node with code at line " << reader.getLocationInFile().line << " in " << getGlobal()->getCurrentFile();
 				Log(LOG_ERROR) << ""; // dummy line to separate similar errors
@@ -3848,7 +4076,7 @@ void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::stri
 	}
 	if (!container && !getDefault().empty())
 	{
-		if (false == parseBase(container, parentName, getDefault()))
+		if (false == parseBase(container, luabytecode, parentName, getDefault()))
 		{
 			Log(LOG_ERROR) << ""; // dummy line to separate similar errors
 		}
@@ -3858,11 +4086,11 @@ void ScriptParserBase::parseNode(ScriptContainerBase& container, const std::stri
 /**
  * Parse string and return new script.
  */
-void ScriptParserBase::parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const
+void ScriptParserBase::parseCode(ScriptContainerBase& container,LuaScriptByteCode &luabytecode, const std::string& parentName, const std::string& srcCode) const
 {
 	if (!srcCode.empty())
 	{
-		if (false == parseBase(container, parentName, srcCode))
+		if (false == parseBase(container,luabytecode, parentName, srcCode))
 		{
 			Log(LOG_ERROR) << "    for code in " << getGlobal()->getCurrentFile();
 			Log(LOG_ERROR) << ""; // dummy line to separate similar errors
@@ -3870,7 +4098,7 @@ void ScriptParserBase::parseCode(ScriptContainerBase& container, const std::stri
 	}
 	if (!container && !getDefault().empty())
 	{
-		if (false == parseBase(container, parentName, getDefault()))
+		if (false == parseBase(container,luabytecode, parentName, getDefault()))
 		{
 			Log(LOG_ERROR) << ""; // dummy line to separate similar errors
 		}
@@ -4041,18 +4269,18 @@ ScriptParserEventsBase::ScriptParserEventsBase(ScriptGlobal* shared, const std::
 /**
  * Parse node and return new script.
  */
-void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::YamlNodeReader& reader) const
+void ScriptParserEventsBase::parseNode(ScriptContainerEventsBase& container,LuaScriptByteCode& dstLuaScript, const std::string& type, const YAML::YamlNodeReader& reader) const
 {
-	ScriptParserBase::parseNode(container._current, type, reader);
+	ScriptParserBase::parseNode(container._current, dstLuaScript, type, reader);
 	container._events = getEvents();
 }
 
 /**
  * Parse string and return new script.
  */
-void ScriptParserEventsBase::parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const
+void ScriptParserEventsBase::parseCode(ScriptContainerEventsBase& container,LuaScriptByteCode& dstLuaScript, const std::string& type, const std::string& srcCode) const
 {
-	ScriptParserBase::parseCode(container._current, type, srcCode);
+	ScriptParserBase::parseCode(container._current, dstLuaScript, type, srcCode);
 	container._events = getEvents();
 }
 
@@ -4155,7 +4383,7 @@ void ScriptParserEventsBase::load(const YAML::YamlNodeReader& scripts)
 			{
 				int offset = 0;
 				ScriptContainerBase scp;
-
+				LuaScriptByteCode luaSCP;
 
 				offset = i["offset"].readVal<double>(0) * OffsetScale;
 				if (offset == 0 || offset >= (int)OffsetMax || offset <= -(int)OffsetMax)
@@ -4169,7 +4397,7 @@ void ScriptParserEventsBase::load(const YAML::YamlNodeReader& scripts)
 
 				{
 					auto nameWithPrefix = name.size() ? "Global:" + name : "Global off: " + i["offset"].readVal<std::string>();
-					if (false == parseBase(scp, nameWithPrefix, i["code"].readVal<std::string>("")))
+					if (false == parseBase(scp,luaSCP, nameWithPrefix, i["code"].readVal<std::string>("")))
 					{
 						Log(LOG_ERROR) << "    for node with code at line " << getLineFromNode(i["code"]) << " in " << getGlobal()->getCurrentFile();
 						Log(LOG_ERROR) << ""; // dummy line to separate similar errors
@@ -4185,6 +4413,7 @@ void ScriptParserEventsBase::load(const YAML::YamlNodeReader& scripts)
 					{
 						it->offset = offset;
 						it->script = std::move(scp);
+						it->luaScript = std::move(luaSCP);
 					}
 					else
 					{
@@ -4200,6 +4429,7 @@ void ScriptParserEventsBase::load(const YAML::YamlNodeReader& scripts)
 					{
 						it->offset = offset;
 						it->script = std::move(scp);
+						it->luaScript = std::move(luaSCP);
 					}
 					else
 					{
@@ -4224,6 +4454,7 @@ void ScriptParserEventsBase::load(const YAML::YamlNodeReader& scripts)
 					data.name = name;
 					data.offset = offset;
 					data.script = std::move(scp);
+					data.luaScript = std::move(luaSCP);
 					_eventsData.push_back(std::move(data));
 				}
 			}

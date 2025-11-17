@@ -384,7 +384,7 @@ struct TypeInfo
 ////////////////////////////////////////////////////////////
 //				containers definitions
 ////////////////////////////////////////////////////////////
-
+typedef std::vector<char> LuaScriptByteCode;
 /**
  * Common base of script execution.
  */
@@ -393,7 +393,12 @@ class ScriptContainerBase
 	friend struct ParserWriter;
 	std::vector<Uint8> _proc;
 
+protected:
+	LuaScriptByteCode luaScript;
+
+
 public:
+
 	/// Constructor.
 	ScriptContainerBase() = default;
 	/// Copy constructor.
@@ -412,13 +417,25 @@ public:
 	/// Test if is any script there.
 	explicit operator bool() const
 	{
-		return !_proc.empty();
+		return !_proc.empty() || !luaScript.empty();
 	}
 
 	/// Get pointer to proc data.
 	const Uint8* data() const
 	{
 		return *this ? _proc.data() : nullptr;
+	}
+
+	/// Get pointer to luabytecode.
+	const LuaScriptByteCode* cluadata() const
+	{
+		return *this ? &luaScript : nullptr;
+	}
+
+	/// Get pointer to luabytecode.
+	LuaScriptByteCode luadata() const
+	{
+		return luaScript;
 	}
 };
 
@@ -432,13 +449,15 @@ public:
 	/// Load code from string in YAML node.
 	void load(const std::string& parentName, const YAML::YamlNodeReader& reader, const Parent& parent)
 	{
-		parent.parseNode(*this, parentName, reader);
+
+		parent.parseNode(*this, this->luaScript, parentName, reader);
 	}
 	/// Load data from string.
 	void load(const std::string& parentName, const std::string& srcCode, const Parent& parent)
 	{
-		parent.parseCode(*this, parentName, srcCode);
+		parent.parseCode(*this, this->luaScript, parentName, srcCode);
 	}
+
 };
 
 /**
@@ -475,16 +494,17 @@ public:
 template<typename Parent, typename... Args>
 class ScriptContainerEvents : public ScriptContainerEventsBase
 {
+	LuaScriptByteCode luaScript;
 public:
 	/// Load code from string in YAML node.
 	void load(const std::string& parentName, const YAML::YamlNodeReader& reader, const Parent& parent)
 	{
-		parent.parseNode(*this, parentName, reader);
+		parent.parseNode(*this, luaScript, parentName, reader);
 	}
 	/// Load data from string.
 	void load(const std::string& parentName, const std::string& srcCode, const Parent& parent)
 	{
-		parent.parseCode(*this, parentName, srcCode);
+		parent.parseCode(*this, luaScript, parentName, srcCode);
 	}
 };
 
@@ -1264,13 +1284,13 @@ protected:
 	~ScriptParserBase();
 
 	/// Common typeless part of parsing string.
-	bool parseBase(ScriptContainerBase& scr, const std::string& parentName, const std::string& srcCode) const;
+	bool parseBase(ScriptContainerBase& scr, LuaScriptByteCode& dstLuaScript, const std::string& parentName, const std::string& srcCode) const;
 
 	/// Parse node and return new script.
-	void parseNode(ScriptContainerBase& container, const std::string& parentName, const YAML::YamlNodeReader& reader) const;
+	void parseNode(ScriptContainerBase& container,LuaScriptByteCode& dstLuaScript, const std::string& parentName, const YAML::YamlNodeReader& reader) const;
 
 	/// Parse string and return new script.
-	void parseCode(ScriptContainerBase& container, const std::string& parentName, const std::string& srcCode) const;
+	void parseCode(ScriptContainerBase& container, LuaScriptByteCode& dstLuaScript, const std::string& parentName, const std::string& srcCode) const;
 
 	/// Test if name is free.
 	bool haveNameRef(const std::string& s) const;
@@ -1529,6 +1549,7 @@ class ScriptParserEventsBase : public ScriptParserBase
 		int offset;
 		std::string name;
 		ScriptContainerBase script;
+		LuaScriptByteCode luaScript;
 	};
 
 	/// Final list of events.
@@ -1538,9 +1559,9 @@ class ScriptParserEventsBase : public ScriptParserBase
 
 protected:
 	/// Parse node and return new script.
-	void parseNode(ScriptContainerEventsBase& container, const std::string& type, const YAML::YamlNodeReader& reader) const;
+	void parseNode(ScriptContainerEventsBase& container,LuaScriptByteCode& dstLuaScript, const std::string& type, const YAML::YamlNodeReader& reader) const;
 	/// Parse string and return new script.
-	void parseCode(ScriptContainerEventsBase& container, const std::string& type, const std::string& srcCode) const;
+	void parseCode(ScriptContainerEventsBase& container,LuaScriptByteCode& dstLuaScript, const std::string& type, const std::string& srcCode) const;
 
 public:
 	/// Constructor.
